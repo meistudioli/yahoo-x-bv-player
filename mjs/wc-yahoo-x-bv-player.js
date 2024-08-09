@@ -2813,7 +2813,7 @@ export class YahooXBvPlayer extends HTMLElement {
 
     updateChatroomLikeCount(this, this.#data.likeCount);
 
-    if (this.#data?.tid) {
+    if (this.#data.tid) {
       clearTimeout(this.#data.tid);
     }
 
