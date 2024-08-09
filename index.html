@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>Web Component: &lt;yahoo-x-bv-player /> - a video player web component based on BlendVision Web SDK</title>
+<meta name="description" content="yahoo-x-bv-player is a video player web component which based on BlendVision Web SDK. It has not only LIVE but also REPLAY features for Yahoo Auction. Sellers could display their products through this player and interact with buyers. We believe this could help them increase commerce conversion rate." />
+<script type="module" src="https://unpkg.com/msc-any-pip/mjs/wc-msc-any-pip.js"></script>
+<script type="module" src="https://unpkg.com/yauction-clipping-purchase/mjs/wc-yauction-clipping-purchase.js"></script>
+<script type="module" src="mjs/wc-yahoo-x-bv-player.js"></script>
+<link rel="stylesheet" href="https://blog.lalacube.com/mei/css/layers/radio-set.css">
+<style>
+/* reset */
+body,div,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,form,fieldset,legend,input,textarea,p,article,aside,figcaption,figure,nav,section,mark,audio,video,main{margin:0;padding:0}
+article,aside,figcaption,figure,nav,section,main{display:block}
+fieldset,img{border:0}
+address,caption,cite,em,strong{font-style:normal;font-weight:400}
+ol,ul{list-style:none}
+caption{text-align:left}
+h1,h2,h3,h4,h5,h6{font-size:100%;font-weight:400}
+abbr{border:0;font-variant:normal}
+input,textarea,select{font-family:inherit;font-size:inherit;font-weight:inherit;}
+body{-webkit-text-size-adjust:none}
+select,input,button,textarea{font:100% arial,helvetica,clean,sans-serif;}
+del{font-style:normal;text-decoration:none}
+pre{font-family:monospace;line-height:100%}
+progress{-webkit-appearance:none;appearance:none;overflow:hidden;border:0 none;}
+
+/* page */
+:root {
+  --bd-bg: #fff;
+  --subject-text: #000;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bd-bg: #121212;
+    --subject-text: #e8eaed;
+  }
+}
+
+/* defaults */
+:root {
+  --ON: initial;
+  --OFF: ;
+  
+  /* fuji */
+  --white: 255 255 255;
+  --marshmallow: 245 248 250;
+  --grey-hair: 240 243 245;
+  --dirty-seagull: 224 228 233;
+  --pebble: 199 205 210;
+  --bob: 176 185 193;
+  --gandalf: 151 158 168;
+  --shark: 130 138 147;
+  --dolphin: 110 119 128;
+  --battleship: 91 99 106;
+  --charcoal: 70 78 86;
+  --ramones: 44 54 63;
+  --batcave: 35 42 49;
+  --inkwell: 29 34 40;
+  --midnight: 16 21 24;
+  --black: 0 0 0;
+  --watermelon: 255 82 87;
+  --solo-cup: 235 15 41;
+  --malibu: 255 0 128;
+  --barney: 204 0 140;
+  --mimosa: 255 211 51;
+  --turmeric: 255 167 0;
+  --masala: 255 139 18;
+  --cheetos: 253 97 0;
+  --carrot-juice: 255 82 13;
+  --mulah: 26 197 103;
+  --bonsai: 0 135 81;
+  --spirulina: 0 160 160;
+  --sea-foam: 17 211 205;
+  --peeps: 125 203 255;
+  --sky: 18 169 255;
+  --dory: 15 105 255;
+  --scooter: 0 99 235;
+  --cobalt: 0 58 188;
+  --denim: 26 13 171;
+  --blurple: 93 94 255;
+  --hendrix: 248 244 255;
+  --thanos: 144 124 255;
+  --starfish: 119 89 255;
+  --hulk-pants: 126 31 255;
+  --grape-jelly: 96 1 210;
+  --mulberry: 80 21 176;
+  --malbec: 57 0 125;
+
+  /* property */
+  --theme-gradient-start: 255 231 98;
+  --theme-gradient-end: 252 218 25;
+  --anchor-green: 58 191 186;
+  --mark-buynow: 0 120 255;
+  --mark-bidding: 255 139 18;
+  --mark-metro-express: 255 77 82;
+  --heart-red: 253 79 87;
+
+  /* shadow */
+  --shadow-elevations-1: 0 1px 0 rgba(var(--dirty-seagull)), 0 0 1px rgba(var(--black)/0);
+  --shadow-elevations-2: 0 0 1px rgba(var(--black)/.1), 0 2px 4px rgba(var(--black)/.08);
+  --shadow-elevations-3: 0 0 1px rgba(var(--black)/.08), 0 4px 8px rgba(var(--black)/.1);
+  --shadow-elevations-4: 0 0 2px rgba(var(--black)/.05), 0 4px 16px rgba(var(--black)/.2);
+  --shadow-elevations-5: 0 0 16px rgba(var(--black)/.05), 0 32px 32px 20px rgba(var(--black)/.4);
+
+  /* safe-area */
+  --el:0;
+  --et:0;
+  --eb:0;
+  --basis-padding: 1em;
+  --spl: calc(var(--el) + var(--basis-padding));
+  --spb: calc(var(--eb) + var(--basis-padding));
+
+  /* icons */
+  --icon-home: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScxNicgaGVpZ2h0PScxNicgdmlld0JveD0nMCAwIDMyIDMyJz48cGF0aCBmaWxsPScjZmZmJyBkPSdNMTYuMTUzIDMuMjI0TDAgMTYuOTYyaDQuMzE0djExLjgxNGg5Ljg3di04LjAwM2gzLjkzNHY4LjAwM2g5Ljg0VjE2Ljk2MkgzMicvPjwvc3ZnPg==) no-repeat 50% 50%/16px 16px;
+  --icon-cart: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyNCcgaGVpZ2h0PScyNCc+PHBhdGggZmlsbD0nI2ZmZicgZD0nTTkuNSAxMC41SDE2Yy41NTIgMCAxIC40NDQgMSAxIDAgLjU1Mi0uNDQ1IDEtMSAxSDkuNWMtLjU1MiAwLTEtLjQ0NC0xLTEgMC0uNTUyLjQ0NS0xIDEtMXpNMTAgMjFhMiAyIDAgMTAtMy45OTktLjAwMUEyIDIgMCAwMDEwIDIxem05LjUgMGEyIDIgMCAxMC0zLjk5OS0uMDAxQTIgMiAwIDAwMTkuNSAyMXpNNC40OTYgMkg0LjVjLjU1Mi4wMDUuOTk4LjQ0NSAxIC45OTZMNyAxNWgxMS41TDIwIDQuOTk2UzIwLjA4MiA0IDIxIDRjLjkxNSAwIDEgLjc2MiAxIDFsLTEuNSAxMS4wMDRjMCAuNTUtLjQ0OC45OTYtMSAuOTk2SDZhMSAxIDAgMDEtMS0uOTk2TDMuNjE2IDRIMS4wMUMuNDUgNCAwIDMuNTU2IDAgM2MwLS41NTIuNDUtMSAxLjAxLTFoMy40ODV6TTkuNSA1LjVIMTZjLjU1MiAwIDEgLjQ0NCAxIDEgMCAuNTUyLS40NDUgMS0xIDFIOS41Yy0uNTUyIDAtMS0uNDQ0LTEtMSAwLS41NTIuNDQ1LTEgMS0xeicvPjwvc3ZnPg==) no-repeat 0% 50%/contain;
+  --icon-order: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyNCcgaGVpZ2h0PScyNCc+PHBhdGggZmlsbD0nI2ZmZicgZD0nTTE4LjYxIDE5LjI1NmwtLjY0Mi0uNDYtMS4yMTgtLjg3Ny0xLjE0My45NjctMS4xNi45ODQtMS4yMzMtMS4wMDMtMS4yMTQtLjk5LTEuMjE0Ljk5LTEuMjMgMS4wMDQtMS4xNjUtLjk4NC0xLjE0My0uOTY3LTEuMjE4Ljg3NS0uNjQuNDZWMy44MzZoMTMuMjJ2MTUuNDJ6TTQuNDQ1IDJhLjk0Ni45NDYgMCAwMC0uOTQ0Ljk0djE4LjEzNmMwIC41NC40NTYuOTIuOTQ4LjkyLjE3IDAgLjM0OC0uMDQ2LjUxLS4xNDhsMi4xOTMtMS41NzZMOC45NyAyMS44MWEuOTc0Ljk3NCAwIDAwMS4xMjcuMDJMMTIgMjAuMjczbDEuOTA2IDEuNTU1YS45NzIuOTcyIDAgMDAxLjEyNy0uMDJsMS44MTQtMS41MzggMi4xOTYgMS41NzZjLjE2My4xMDIuMzQuMTQ4LjUxLjE0OC40OTIgMCAuOTQ3LS4zOC45NDctLjkyVjIuOTRhLjk0NS45NDUgMCAwMC0uOTQ0LS45NEg0LjQ0NHptMTEuMzMzIDEwLjExM2MuNTIyIDAgLjk0NS0uNDEuOTQ1LS45MThzLS40MjMtLjkyLS45NDUtLjkySDguMjIzYS45MzIuOTMyIDAgMDAtLjk0NC45MmMwIC41MDcuNDIuOTE4Ljk0My45MThoNy41NTR6TTExLjA1NSA4LjQ0Yy4yNjIgMCAuOTQ1LS4yMjQuOTQ1LS45MiAwLS41MDctLjQyMy0uOTE3LS45NDUtLjkxN0g4LjIyM2MtLjUyMiAwLS45NDQuNDEtLjk0NC45MThzLjQyLjkyLjk0My45MmgyLjgzMnptNC43MjIgNy4zNDdjLjUyMiAwIC45NDUtLjQxLjk0NS0uOTE4IDAtLjUxLS40MjMtLjkyLS45NDUtLjkySDguMjIzYS45My45MyAwIDAwLS45NDQuOTJjMCAuNTA2LjQyLjkxNy45NDMuOTE3aDcuNTU0eicvPjwvc3ZnPg==) no-repeat 0% 50%/contain;
+  --icon-close: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyNCcgaGVpZ2h0PScyNCc+PHBhdGggZmlsbD0nIzk3OWVhOCcgZD0nTTEyIDEwLjU4OEw2LjcwMiA1LjI5YTEgMSAwIDAwLTEuNDA4LjAwNC45OTMuOTkzIDAgMDAtLjAwMyAxLjQwOEwxMC41ODggMTJsLTUuMjk3IDUuMjk3YTEgMSAwIDAwLjAwMyAxLjQwOC45OTMuOTkzIDAgMDAxLjQwOC4wMDRMMTIgMTMuNDExbDUuMjk4IDUuMjk4YS45OTkuOTk5IDAgMDAxLjQxMS0xLjQxMkwxMy40MTIgMTJsNS4yOTctNS4yOThhMSAxIDAgMDAtLjAwMy0xLjQwOC45OTUuOTk1IDAgMDAtMS40MDgtLjAwNEwxMiAxMC41ODh6Jy8+PC9zdmc+) no-repeat 50% 50%/24px 24px;
+  --icon-arrow-left: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyNCcgaGVpZ2h0PScyNCc+PHBhdGggZD0nTTEwLjgwMiAxMmw0LjkwNi00LjgzNGEuOTczLjk3MyAwIDAwLS4wMDMtMS4zNzguOTk0Ljk5NCAwIDAwLTEuMzk3LS4wMDNMOCAxMi4wMDFsNi4zMSA2LjIxN2MuMzc4LjM3MyAxLjAxLjM4IDEuMzk3LS4wMDJhLjk2Mi45NjIgMCAwMC4wMDMtMS4zNzhsLTQuOTA4LTQuODM3eicgZmlsbD0nI2ZmZicgZmlsbC1ydWxlPSdldmVub2RkJy8+PC9zdmc+) no-repeat 50% 50%/24px 24px;
+  --icon-arrow-right: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPScyNCcgaGVpZ2h0PScyNCc+PHBhdGggZD0nTTEzLjE5NyAxMkw4LjI5MSA3LjE2NmEuOTczLjk3MyAwIDAxLjAwMy0xLjM3OC45OTQuOTk0IDAgMDExLjM5Ny0uMDAzbDYuMzA4IDYuMjE2LTYuMzEgNi4yMTdjLS4zNzguMzczLTEuMDEuMzgtMS4zOTctLjAwMmEuOTYyLjk2MiAwIDAxLS4wMDMtMS4zNzhsNC45MDgtNC44Mzd6JyBmaWxsPScjZmZmJyBmaWxsLXJ1bGU9J2V2ZW5vZGQnLz48L3N2Zz4=) no-repeat 50% 50%/24px 24px;
+
+  /* mask */
+  --mask-chevron-next: path('M13.197 12 8.29 7.167a.971.971 0 0 1 .003-1.378.995.995 0 0 1 1.397-.003L16 12.001l-6.31 6.217a1.004 1.004 0 0 1-1.397-.002.962.962 0 0 1-.003-1.378l4.908-4.837Z');
+
+  /* animation */
+  --transition-timing-function: cubic-bezier(.4,0,.2,1);
+
+  /* pages */
+  --view: '';
+  --max-width: 100%;
+  /*--section-padding: 0 1em;*/
+  --section-padding: 0 calc(1em + var(--el));
+  --border-radius: .5em;
+  --direction-factor: 1;
+  --margin-block-gap: 1.25em;
+
+  --main-bgc: #f1f1f5;
+  --module-bgc: rgba(var(--white));
+  --text-color: #232a31;
+
+  /* modules */
+  --nav-inline-size: 13em;
+  --intro-text: #5f6368;
+}
+
+@supports (bottom:env(safe-area-inset-top)) {
+  :root {
+    --el: env(safe-area-inset-left);
+    --et: env(safe-area-inset-top);
+    --eb: env(safe-area-inset-bottom);
+  }
+
+  @supports (bottom:max(.75em,1px)) {
+    :root {
+      --spl: max(var(--basis-padding), var(--el));
+      --spb: max(var(--basis-padding), var(--eb));
+    }
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --intro-text: #9aa0a6;
+  }
+}
+
+/* page */
+html{font-family:system-ui,sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;font-size:16px;background-color:var(--main-bgc);scroll-behavior:smooth;}
+html[dir='rtl']{--direction-factor:-1;}
+#bd{margin:0 auto;}
+a,a:hover{text-decoration:none;}
+a{color:rgba(var(--anchor-green));}
+.center-module{max-inline-size:var(--max-width);margin:0 auto;box-sizing:border-box;padding:var(--section-padding);}
+.center-module--main>*{margin-block-start:var(--margin-block-gap);}
+
+.absolute-center{position:absolute;top:0;left:0;bottom:0;right:0;margin:auto;}
+.text-overflow{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.text-overflow--ltr-start{direction:rtl;text-align:start;}
+.text-overflow--rtl{direction:rtl;text-align:end;}
+.line-fadeout{position:relative;}
+.line-fadeout:after{position:absolute;content:'';text-align:right;bottom:0;right:0;width:70%;height:var(--fadeout-h, 1.2em);background:linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,1));}
+.line-clampin{display:-webkit-box;-webkit-line-clamp:var(--line-clamp,2);-webkit-box-orient:vertical;text-overflow:ellipsis;overflow:hidden;}
+.stuff{text-indent:100%;white-space:nowrap;overflow:hidden;}
+.aspect-ratio{position:relative;width:100%;--w:4;--h:3;}
+.aspect-ratio:before{content:'';width:100%;padding-top:calc(var(--h) * 100% / var(--w));display:block;}
+.aspect-ratio .content{position:absolute;top:0;left:0;right:0;bottom:0;}
+.force-radius{overflow:hidden;transform:translate3d(0,0,0);border-radius:var(--r,8px);}
+.contain{object-fit:contain;}
+.cover{object-fit:cover;}
+.overscrolling{-webkit-overflow-scrolling:touch;overflow:hidden;overflow-y:scroll;overscroll-behavior:contain;}
+.vanquish{position:absolute;left:0;top:0;width:1px;height:1px;overflow:hidden;}
+.flex-center{display:flex;justify-content:center;align-items:center;}
+
+/* media query */
+@media screen and (max-width: 767px) {
+  :root {
+    --view: 'mobile';
+    --section-padding: 0;
+    --border-radius: 0;
+  }
+}
+
+@media screen and (min-width: 768px) {
+  :root {
+    --view: 'tablet';
+    --max-width: 1023px;
+  }
+}
+
+@media screen and (min-width: 1024px) {
+  :root {
+    --view: 'desktop';
+    --max-width: 1279px;
+  }
+}
+
+@media screen and (min-width: 1280px) {
+  :root {
+    --view: 'desktop max';
+    --max-width: 1280px;
+    --section-padding: 0 1.5em;
+  }
+}
+
+/* setting-form */
+.setting-form {
+  --background-color: #dce2f0;
+  --subject-inline-size: 150px;
+
+  --il-align-item: center;
+  --il-pair-gap: 6px;
+
+  --a11y-block-link-expand: 6px;
+  --a11y-block-link-border-radius: 32px;
+
+  inline-size: min(100%,800px);
+  box-sizing: border-box;
+  margin-block: 2.5em;
+  margin-inline: auto;
+  display: block;
+
+  .demo-wrap {
+    inline-size: 100%;
+    aspect-ratio: 2/1.5;
+    /*background-color: var(--background-color);*/
+    border-radius: .5em;
+    display: grid;
+    place-content: center;
+  }
+
+  .adjustments {
+    .adjustments__row {
+      display: flex;
+      align-items: flex-start;
+      gap: 1em;
+
+      &:has(select) {
+        align-items: center;
+      }
+
+      &:nth-child(n + 2 of .adjustments__row) {
+        margin-block-start: .75em;
+      }
+
+      .adjustments__row__subject {
+        inline-size: var(--subject-inline-size);
+        color: var(--subject-text);
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        &::before {
+          inline-size: 6px;
+          aspect-ratio: 1/1;
+          border-radius: 4px;
+          background-color: currentColor;
+          content: '';
+        }
+      }
+
+      .adjustments__row__content {
+        color: var(--intro-text);
+        min-inline-size: 0;
+        flex-grow: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1em;
+      }
+    }
+  }
+
+  @media (prefers-color-scheme: dark) {
+    --background-color: rgba(var(--midnight));
+
+    .radio-set,.input-set {
+      --default-accent-color: rgba(75 168 248);
+    }
+  }
+}
+
+/* il-pair */
+.il-pair {
+  --gap: var(--il-pair-gap, .75em);
+  --align-items: var(--il-align-item, flex-start);
+
+  display: flex;
+  align-items: var(--align-items);
+  gap: var(--gap);
+
+  > :first-child {
+    flex-shrink: 0;
+  }
+
+  > :last-child {
+    line-height: 20px;
+  }
+
+  &.a11y-block-link {
+    display: flex;
+  }
+}
+
+html,body{font-family:system-ui,sans-serif;text-size-adjust:100%;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;font-size:16px;}
+#hd,#ft{display:none;}
+body{position:relative;inline-size:100vw;block-size:100vh;margin:0;background:var(--bd-bg);}
+
+.wrap{inline-size:100%;max-inline-size:min(800px, calc(100% - 2em));box-sizing:border-box;}
+.yahoo-x-bv-player-wrap {
+  inline-size: 100%;
+  aspect-ratio: 16/9;
+  border-radius: .5em;
+  overflow: hidden;
+  
+  + .setting-form {
+    --subject-inline-size: auto;
+    margin-block-start: 1em;
+  }
+}
+
+yahoo-x-bv-player {
+  --yahoo-x-bv-player-host-count-text: '觀看';
+  --yahoo-x-bv-player-chatroom-message-owner-text: '直播主';
+
+  @media (prefers-color-scheme: dark) {
+    --yahoo-x-bv-player-dialog-background-color: rgba(38 39 41);
+    --yahoo-x-bv-player-dialog-backdrop-color: rgba(0 0 0/.7);
+    --yahoo-x-bv-player-dialog-head-text-color: rgba(255 255 255);
+    --yahoo-x-bv-player-dialog-listing-title-color: rgba(245 248 250);
+    --yahoo-x-bv-player-dialog-line-color: rgba(91 99 106);
+    --yahoo-x-bv-player-dialog-listing-price-color: rgba(255 82 87);
+    --yahoo-x-bv-player-dialog-listing-hover-color: rgba(51 52 55);
+    --yahoo-x-bv-player-dialog-listing-broadcasting-color: rgba(255 211 51/.2);
+    --yahoo-x-bv-player-dialog-listing-buynow-color: rgba(15 105 255);
+    --yahoo-x-bv-player-dialog-close-hover-background-color: rgba(51 52 55);
+    --yahoo-x-bv-player-dialog-close-icon-color: rgba(130 138 147);
+
+    --yahoo-x-bv-player-live-controls-input-text-color: rgba(255 255 255);
+    --yahoo-x-bv-player-live-controls-input-placeholder-color: rgba(255 255 255/.5);
+    --yahoo-x-bv-player-live-controls-form-background-color: rgba(0 0 0/.75);
+  }
+}
+
+yahoo-x-bv-player:not(:defined){visibility:hidden;}
+msc-any-pip:not(:defined){visibility:hidden;}
+</style>
+</head>
+
+<body class="flex-center">
+<div class="wrap">
+  <div class="yahoo-x-bv-player-wrap">
+    <msc-any-pip class="align-container-size" winwidth="450" winheight="254">
+      <yahoo-x-bv-player>
+        <script type="application/json">
+          {
+            "playerconfig": {
+              "license": "f972eb3f-a0ce-4df4-9346-33a514485209",
+              "title": "Tunnel",
+              "source": [
+                {
+                  "type": "video/mp4",
+                  "src": "https://blog.lalacube.com/mei/video/tunnel.mp4"
+                }
+              ]
+            },
+            "share": {
+              "title": "Yahoo X BlendVision",
+              "text": "This is a Yahoo X BlendVision video player.",
+              "url": "https://blog.lalacube.com/mei/webComponent_yahoo-x-bv-player.html"
+            },
+            "poster": "https://blog.lalacube.com/mei/img/yahoo-x-bv-player/poster_tunnel.png",
+            "host": {
+              "avatar": "https://blog.lalacube.com/mei/img/yahoo-x-bv-player/avatar-kafka.png",
+              "name": "日比野卡夫卡",
+              "link": "#",
+              "count": 999,
+              "announce": "只要輸碼「保科」即可享有折扣 $100 的優惠～"
+            },
+            "l10n": {
+              "previewtrigger": "View",
+              "listingshead": "Products",
+              "buynow": "BUY NOW",
+              "jointhecrowd": "加入圍觀群眾。",
+              "rushbuying": "正在瘋搶商品！",
+              "addfavorite": "把主播加入最愛！",
+              "sharelive": "分享了直播！",
+              "takesnapshot": "拍了張紀念照。",
+              "achievetrophy": "送出了 {{hits}} 個讚。"
+            },
+            "products": [
+              {
+                "id": "101545162736",
+                "uuid": "334c6ea9-244e-4a6c-b320-d3506b4d6d91",
+                "title": "栗特小舖【JP18545】黏土人 怪獸8號 日比野卡夫卡 約100mm 日空 日版",
+                "link": "https://tw.bid.yahoo.com/item/101545162736",
+                "thumbnail": "https://s.yimg.com/cl/api/res/1.2/7K8OLwODYiHkCtl9BryqIA--/YXBwaWQ9eXR3YXVjdGlvbnNlcnZpY2U7aD02MDA7cT04NTtyb3RhdGU9YXV0bzt3PTYwMA--/https://s.yimg.com/ob/image/d9be083f-6667-4ec1-8f0a-d99cf29ea247.jpg",
+                "price": "2,699",
+                "bestDiscount": "8折",
+                "marks": {
+                  "coupon": true,
+                  "shippingCoupon": false,
+                  "buynow": true
+                },
+                "buyCount": 1
+              },
+              {
+                "id": "101550457845",
+                "uuid": "334c6ea9-244e-4a6c-b320-d3506b4d6d92",
+                "title": "栗特小舖【JP18614】黏土人 怪獸8號 四之宮琪歌露 約100mm 日空 日版",
+                "link": "https://tw.bid.yahoo.com/item/101550457845",
+                "thumbnail": "https://s.yimg.com/cl/api/res/1.2/pPWIyb34iqUmNwd24tzZ0A--/YXBwaWQ9eXR3YXVjdGlvbnNlcnZpY2U7aD02MDA7cT04NTtyb3RhdGU9YXV0bzt3PTYwMA--/https://s.yimg.com/ob/image/656d77b8-818e-42fa-9a09-13f3c1a747ee.jpg",
+                "price": "2,850",
+                "bestDiscount": "75折",
+                "marks": {
+                  "coupon": true,
+                  "shippingCoupon": true,
+                  "buynow": true
+                },
+                "buyCount": 10
+              },
+              {
+                "id": "101544973000",
+                "uuid": "334c6ea9-244e-4a6c-b320-d3506b4d6d93",
+                "title": "栗特小舖【JP18544】黏土人 怪獸8號 市川雷諾 約100mm 日空 日版",
+                "link": "https://tw.bid.yahoo.com/item/101544973000",
+                "thumbnail": "https://s.yimg.com/cl/api/res/1.2/luy3Ad0ek31ZQaULCTheuQ--/YXBwaWQ9eXR3YXVjdGlvbnNlcnZpY2U7aD02MDA7cT04NTtyb3RhdGU9YXV0bzt3PTYwMA--/https://s.yimg.com/ob/image/509ae829-a6cb-44bd-a11e-388ac081d191.jpg",
+                "price": "2,699",
+                "marketPrice": "2,999",
+                "bestDiscount": "9折",
+                "marks": {
+                  "coupon": false,
+                  "shippingCoupon": false,
+                  "buynow": true
+                },
+                "buyCount": 0
+              },
+              {
+                "id": "101558829751",
+                "uuid": "334c6ea9-244e-4a6c-b320-d3506b4d6d94",
+                "title": "栗特小舖【JP18683】黏土人 怪獸8號 亞白米娜 約100mm 日空 日版",
+                "link": "https://tw.bid.yahoo.com/item/101558829751",
+                "thumbnail": "https://s.yimg.com/cl/api/res/1.2/.cR6SxZdNqU.PFCCYBBg0w--/YXBwaWQ9eXR3YXVjdGlvbnNlcnZpY2U7aD02MDA7cT04NTtyb3RhdGU9YXV0bzt3PTYwMA--/https://s.yimg.com/ob/image/1dfcd8fb-053f-4d1c-b0c9-fe0c848f8bf0.jpg",
+                "price": "",
+                "marketPrice": "",
+                "priceRange": {
+                  "min": "2,750",
+                  "max": "2,900"
+                },
+                "bestDiscount": "",
+                "marks": {
+                  "coupon": false,
+                  "shippingCoupon": false,
+                  "buynow": true
+                },
+                "buyCount": 0
+              },
+              {
+                "id": "101558680803",
+                "uuid": "334c6ea9-244e-4a6c-b320-d3506b4d6d95",
+                "title": "栗特小舖【JP18681】黏土人 怪獸8號 保科宗四郎 約100mm 日空 日版",
+                "link": "https://tw.bid.yahoo.com/item/101558680803",
+                "thumbnail": "https://s.yimg.com/cl/api/res/1.2/TAbxOANm0XvTJhFHLjDTqw--/YXBwaWQ9eXR3YXVjdGlvbnNlcnZpY2U7aD02MDA7cT04NTtyb3RhdGU9YXV0bzt3PTYwMA--/https://s.yimg.com/ob/image/213f4d77-28c5-483a-9a11-44f5d57ef066.jpg",
+                "price": "2,750",
+                "marketPrice": "3,299",
+                "bestDiscount": "84折",
+                "marks": {
+                  "coupon": false,
+                  "shippingCoupon": false,
+                  "buynow": false
+                },
+                "buyCount": 0
+              },
+              {
+                "id": "101127937595",
+                "uuid": "334c6ea9-244e-4a6c-b320-d3506b4d6d96",
+                "title": "【怪獸8號01~10】全新未拆封/長鴻/ 松本直也978626005613100100",
+                "link": "https://tw.bid.yahoo.com/item/101127937595",
+                "thumbnail": "https://s.yimg.com/cl/api/res/1.2/aiCo9nTnXaKDXagZpT_ncg--/YXBwaWQ9eXR3YXVjdGlvbnNlcnZpY2U7aD03MDA7cT04NTtyb3RhdGU9YXV0bzt3PTQ2OA--/https://s.yimg.com/ob/image/b3af2c49-b88a-4b35-a9eb-77751b3ef32a.jpg",
+                "price": "838",
+                "marketPrice": "1,000",
+                "bestDiscount": "83折",
+                "marks": {
+                  "coupon": true,
+                  "shippingCoupon": true,
+                  "buynow": true
+                },
+                "buyCount": 20,
+                "broadcasting": true
+              }
+            ]
+          }
+        </script>
+      </yahoo-x-bv-player>
+    </msc-any-pip>
+  </div>
+
+  <form class="setting-form">
+    <ul class="adjustments">
+      <li class="adjustments__row">
+        <p class="adjustments__row__subject">type：</p>
+        <div class="adjustments__row__content">
+          <div class="il-pair a11y-block-link">
+            <div class="radio-set">
+              <input id="player-type-0" type="radio" name="player-type" value="live" checked />
+              <label class="radio-set__label" for="player-type-0"></label>
+            </div>
+
+            <label for="player-type-0">
+              LIVE
+            </label>
+          </div>
+
+          <div class="il-pair a11y-block-link">
+            <div class="radio-set">
+              <input id="player-type-1" type="radio" name="player-type" value="replay" />
+              <label class="radio-set__label" for="player-type-1"></label>
+            </div>
+
+            <label for="player-type-1">
+              REPLAY
+            </label>
+          </div>
+        </div>
+      </li>
+
+      <li class="adjustments__row">
+        <p class="adjustments__row__subject">auto like：</p>
+        <div class="adjustments__row__content">
+          <div class="il-pair a11y-block-link">
+            <div class="radio-set">
+              <input id="player-auto-like-0" type="radio" name="player-auto-like" value="true" />
+              <label class="radio-set__label" for="player-auto-like-0"></label>
+            </div>
+
+            <label for="player-auto-like-0">
+              YES
+            </label>
+          </div>
+
+          <div class="il-pair a11y-block-link">
+            <div class="radio-set">
+              <input id="player-auto-like-1" type="radio" name="player-auto-like" value="false" checked />
+              <label class="radio-set__label" for="player-auto-like-1"></label>
+            </div>
+
+            <label for="player-auto-like-1">
+              NO
+            </label>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </form>
+</div>
+
+<yauction-clipping-purchase class="allowR18">
+  <script type="application/json">
+    {
+      "l10n": {
+        "cart": "加入購物車",
+        "buy": "直接購買",
+        "pickSpec": "請選擇「{{spec}}」，謝謝。"
+      },
+      "params": {
+        "wssid": "R2jDLIaYrpGxA"
+      },
+      "webservice": {
+        "info": "https://blog.lalacube.com/mei/WS_clipping-purchase.php?type=info",
+        "cart": "https://blog.lalacube.com/mei/WS_clipping-purchase.php?type=cart"
+      }
+    }
+  </script>
+</yauction-clipping-purchase>
+
+<script type="module">
+customElements.whenDefined('yahoo-x-bv-player').then(() => {
+  const clippingPurchase = document.querySelector('yauction-clipping-purchase');
+  const players = Array.from(document.querySelectorAll('yahoo-x-bv-player'));
+  const form = document.querySelector('.setting-form');
+  const playerClass = customElements.get('yahoo-x-bv-player');
+  const { supportedEvents } = playerClass;
+
+  const handler = (evt) => {
+    const { type, target } = evt;
+
+    switch (type) {
+      case 'input': {
+        const formData = new FormData(form);
+        const fd = Object.fromEntries(formData.entries());
+
+        players[0].type = fd['player-type'];
+        players[0].autopilot = fd['player-auto-like'] === 'true';
+        break;
+      }
+
+      case 'yahoo-x-bv-player-play':
+      case 'yahoo-x-bv-player-pause':
+      case 'yahoo-x-bv-player-seeking':
+      case 'yahoo-x-bv-player-ended': {
+        const act = type.split('-').at(-1);
+        const {
+          playerconfig: {
+            title = ''
+          } = {}
+        } = target;
+
+        console.log(
+          `%c${type}%c >「%c${title}%c」is ${act}.`,
+          'font-size:12px;line-height:1.3;background:#3a99d8;color:#fff;border-radius:3px;padding:0 4px;',
+          'font-size:12px;line-height:1.3;',
+          'font-size:12px;line-height:1.3;color:#a4f6b7;',
+          'font-size:12px;line-height:1.3;'
+        );
+        break;
+      }
+
+      case 'yahoo-x-bv-player-follow-click': {
+        const {
+          detail: {
+            follow = false
+          } = {}
+        } = evt;
+
+        target.host = { follow: follow };
+      }
+
+      case 'yahoo-x-bv-player-purchase-click': {
+        const { detail } = evt;
+        const {
+          id,
+          marks: {
+            buynow = false
+          } = {}
+        } = detail;
+
+        if (buynow) {
+          clippingPurchase.show(id);
+        }
+        break;
+      }
+    }
+  };
+
+  // events
+  players.forEach(
+    (player) => {
+      supportedEvents.forEach(
+        (event) => {
+          player.addEventListener(event, handler);
+        }
+      );
+    }
+  );
+  form.addEventListener('input', handler);
+});
+</script>
+</body>
+
+</html>

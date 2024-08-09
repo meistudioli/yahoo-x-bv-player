@@ -15,7 +15,7 @@ yahoo-x-bv-player is a video player web component which based on BlendVision Web
 ```html
 <script
   type="module"
-  src="https://unpkg.com/yahoo-x-bv-player/mjs/yahoo-x-bv-player.js">        
+  src="https://unpkg.com/yahoo-x-bv-player/mjs/wc-yahoo-x-bv-player.js">        
 </script>
 ```
 
@@ -112,7 +112,7 @@ Otherwise, developers could also choose remoteconfig to fetch config for &lt;yah
 
 ```html
 <script type="module">
-import { YahooXBvPlayer } from 'https://your-domain/wc-yahoo-x-bv-player.js';
+import { YahooXBvPlayer } from 'https://unpkg.com/yahoo-x-bv-player/mjs/wc-yahoo-x-bv-player';
 
 // use DOM api
 const nodeA = document.createElement('yahoo-x-bv-player');
