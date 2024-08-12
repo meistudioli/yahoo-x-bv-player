@@ -371,7 +371,7 @@ msc-any-pip:not(:defined){visibility:hidden;}
 <div class="wrap">
   <div class="yahoo-x-bv-player-wrap">
     <msc-any-pip class="align-container-size" winwidth="450" winheight="254">
-      <yahoo-x-bv-player>
+      <yahoo-x-bv-player autoplay>
         <script type="application/json">
           {
             "playerconfig": {
@@ -617,6 +617,7 @@ customElements.whenDefined('yahoo-x-bv-player').then(() => {
       case 'yahoo-x-bv-player-play':
       case 'yahoo-x-bv-player-pause':
       case 'yahoo-x-bv-player-seeking':
+      case 'yahoo-x-bv-player-live-ended':
       case 'yahoo-x-bv-player-ended': {
         const act = type.split('-').at(-1);
         const {

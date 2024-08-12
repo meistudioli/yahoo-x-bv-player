@@ -112,7 +112,7 @@ Otherwise, developers could also choose remoteconfig to fetch config for &lt;yah
 
 ```html
 <script type="module">
-import { YahooXBvPlayer } from 'https://unpkg.com/yahoo-x-bv-player/mjs/wc-yahoo-x-bv-player';
+import { YahooXBvPlayer } from 'https://unpkg.com/yahoo-x-bv-player/mjs/wc-yahoo-x-bv-player.js';
 
 // use DOM api
 const nodeA = document.createElement('yahoo-x-bv-player');
@@ -356,6 +356,16 @@ Set autopilot for like button or not.
 </yahoo-x-bv-player>
 ```
 
+- **autoplay**
+
+Set autoplay for video.
+
+```html
+<yahoo-x-bv-player autoplay>
+  ...
+</yahoo-x-bv-player>
+```
+
 - **host**
 
 Set host information.
@@ -425,9 +435,18 @@ Set products' information.
 | poster | String | Getter / Setter video poster. |
 | loop | Boolean | Getter / Setter video loop. |
 | autopilot | Boolean | Getter / Setter autopilot for like button. |
+| currentTime | Number | Getter / Setter the current playback time in seconds. |
+| muted | Boolean | Getter / Setter video is muted. |
+| paused | Boolean | Getter video paused status. |
 | host | Object | Getter / Setter host information. Developers could set `avatar`、`name`、`link`、`count`、`announce` and `follow` here. |
 | l10n | Object | Getter / Setter localization for title or action buttons. Developers could set `previewtrigger`、`listingshead`、`buynow`、`jointhecrowd`、`rushbuying`、`addfavorite`、`sharelive`、`takesnapshot` and `achievetrophy` here. |
 | products | Array | Getter / Setter products' information. Developers could set `id`、`uuid`、`title`、`link`、`thumbnail`、`bestDiscount`、`marks`、`buyCount` and `broadcasting` here. |
+
+## Mathods
+| Mathod Signature | Description |
+| ----------- | ----------- |
+| play | Play video. |
+| pause | Pause video. |
 
 ## Events
 | Event Signature | Description |
@@ -438,6 +457,7 @@ Set products' information.
 | yahoo-x-bv-player-ended | Fired when video ended. |
 | yahoo-x-bv-player-purchase-click | Fired when product's purchase button clicked. Developers could gather product information through event.detail. |
 | yahoo-x-bv-player-follow-click | Fired when host's follow button clicked. Developers could gather follow information through event.detail. |
+| yahoo-x-bv-player-live-ended | Fired when LIVE ended. |
 
 ## Reference
 - [BlendVision Web SDK](https://www.blendvision.com/zh-tw)

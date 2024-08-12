@@ -10,6 +10,9 @@ import 'https://unpkg.com/@blendvision/chatroom-javascript-sdk/index.min.js';
 
 /*
  reference:
+ - https://developers.blendvision.com/zh/docs/player/web-sdk/quick-start
+ - https://developers.blendvision.com/zh/docs/sdk/player/web/intro
+ - https://www.npmjs.com/package/@blendvision/chatroom-javascript-sdk
  - https://developer.chrome.com/docs/web-platform/document-picture-in-picture
  - https://developer.mozilla.org/en-US/docs/Web/API/Picture-in-Picture_API
  - https://developer.mozilla.org/en-US/docs/Web/API/Fullscreen_API
@@ -99,7 +102,8 @@ const custumEvents = {
   seeking: 'yahoo-x-bv-player-seeking',
   ended: 'yahoo-x-bv-player-ended',
   purchaseClick: 'yahoo-x-bv-player-purchase-click',
-  followClick: 'yahoo-x-bv-player-follow-click'
+  followClick: 'yahoo-x-bv-player-follow-click',
+  liveEnded: 'yahoo-x-bv-player-live-ended'
 };
 const legalKey = [
   'k',
@@ -2609,10 +2613,8 @@ const setupChatroom = async (target, config, callbacks) => {
         likeCount,
         announce
       };
-      
-      // console.log('chatroom init success.', data);
     } catch (err) {
-      console.warn(`BV Chatroom: ${err.message}`);
+      console.warn('BV Chatroom init fail.');
     }
   }
 
@@ -3534,7 +3536,7 @@ export class YahooXBvPlayer extends HTMLElement {
         // events
         this.#data.controllerForVideo = new AbortController();
         const signal = this.#data.controllerForVideo.signal;
-        const playerEvents = ['canplay', 'ended', 'progress', 'timeupdate', 'play', 'pause', 'volumechange', 'seeking'];
+        const playerEvents = ['canplay', 'ended', 'progress', 'timeupdate', 'play', 'pause', 'volumechange', 'seeking', 'playback_video_ended'];
 
         playerEvents.forEach((event) => player.addEventListener(event, this._playerEventsHandler));
         video.addEventListener('click', this._onStageClick , { signal });
@@ -3547,6 +3549,17 @@ export class YahooXBvPlayer extends HTMLElement {
 
         video.loop = this.loop;
         video.poster = this.poster;
+
+        // autoplay stuff (web component should set attribute "autoplay")
+        setTimeout(
+          () => {
+            if (this.hasAttribute('autoplay')) {
+              this.removeAttribute('autoplay');
+              player.setVolume(0);
+              player.play();
+            }
+          }
+        , 500);
       }
     );
   }
@@ -3735,6 +3748,12 @@ export class YahooXBvPlayer extends HTMLElement {
           
           progressBuffer.value = loaded || 0;
         }
+        break;
+      }
+
+      case 'playback_video_ended': {
+        // TODO: add live ended style
+        this.#fireEvent(custumEvents.liveEnded);
         break;
       }
     }
