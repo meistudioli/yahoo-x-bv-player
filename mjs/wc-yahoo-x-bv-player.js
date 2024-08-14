@@ -63,13 +63,13 @@ const defaults = {
         "title": "",
         "link": "",
         "thumbnail": "",
-        "price": "",
-        "marketPrice": "",
+        "price": "$ 1,000",
+        "marketPrice": "$ 2,000",
         "priceRange": {
-          "min": "",
-          "max": "",
+          "min": "$ 1,000",
+          "max": "$ 2,000",
         },
-        "bestDiscount": "",
+        "bestDiscount": "-40%",
         "marks": {
           "coupon": false,
           "shippingCoupon": false,
@@ -2177,17 +2177,19 @@ templateProducts.innerHTML = `
       <p class="listings__unit__info__title line-clampin">{{title}}</p>
       <div class="listings__unit__info__prices">
         {{#priceRange}}
-          <em class="listings__unit__info__prices__unit">$ {{priceRange.min}}</em>
+          <em class="listings__unit__info__prices__unit">{{priceRange.min}}</em>
           <span class="listings__unit__info__prices__sign">~</span>
-          <em class="listings__unit__info__prices__unit">$ {{priceRange.max}}</em>
+          <em class="listings__unit__info__prices__unit">{{priceRange.max}}</em>
         {{/priceRange}}
 
-        {{#price}}
-          <em class="listings__unit__info__prices__unit">$ {{price}}</em>
-          {{#marketPrice}}
-            <em class="listings__unit__info__prices__market-price">$ {{marketPrice}}</em>
-          {{/marketPrice}}
-        {{/price}}
+        {{^priceRange}}
+          {{#price}}
+            <em class="listings__unit__info__prices__unit">{{price}}</em>
+            {{#marketPrice}}
+              <em class="listings__unit__info__prices__market-price">{{marketPrice}}</em>
+            {{/marketPrice}}
+          {{/price}}
+        {{/priceRange}}
 
         {{#bestDiscount}}
           <em class="listings__unit__info__prices__discount">{{bestDiscount}}</em>
@@ -2463,6 +2465,42 @@ const getChatroomId = (target) => {
 
   return id;
 };
+
+const findLastMessageType = (messages = {}, type = 'carousel') => {
+  let data = {};
+
+  if (Object.keys(messages).length) {
+    const keys = Object.keys(messages).sort((a, b) => +a - +b);
+    const found = keys.findLastIndex(
+      (key) => {
+        const idx = messages[key].findIndex(
+          ({ raw = '' } = {}) => {
+            return raw.includes(type);
+          }
+        );
+        return idx !== -1;
+      }
+    );
+
+    if (found !== -1) {
+      const key = keys[found];
+      const idx = messages[key].findLastIndex(
+        ({ raw = '' } = {}) => {
+          return raw.includes(type);
+        }
+      );
+
+      try {
+        data = JSON.parse(messages[key][idx]['raw']);
+      } catch(err) {
+        console.warn(`yahoo-x-bv-player: ${err.message}`);
+      }
+    }
+  }
+
+  return data;
+};
+
 const setupChatroom = async (target, config, callbacks) => {
   const { token = '', refreshToken = '', host = '' } = config;
 
@@ -2562,7 +2600,8 @@ const setupChatroom = async (target, config, callbacks) => {
         '7': [
           { user, raw: '{"type":"shareLive","content":"分享了直播！"}' },
           { user, raw: '{"type":"userMessage","content":"來自粉絲的訊息"}' }, 
-          { user, raw: '{"type":"trophy","content":"送出了 1000 個讚。"}' }
+          { user, raw: '{"type":"trophy","content":"送出了 1000 個讚。"}' },
+          { user, raw: '{"type":"sellingListing","content":{"id":"334c6ea9-244e-4a6c-b320-d3506b4d6d92"}}' }
         ],
         '5': [
           { user, raw: '{"type":"favoriteHost","content":"把主播加入最愛！"}' },
@@ -2573,45 +2612,26 @@ const setupChatroom = async (target, config, callbacks) => {
       */
 
       // get lastest announce
-      let announce = '';
-      if (Object.keys(messages).length) {
-        const keys = Object.keys(messages).sort((a, b) => +a - +b);
-        const found = keys.findLastIndex(
-          (key) => {
-            const idx = messages[key].findIndex(
-              ({ raw = '' } = {}) => {
-                return raw.includes('carousel');
-              }
-            );
-            return idx !== -1;
-          }
-        );
+      const {
+        content: {
+          text: announce = ''
+        } = {}
+      } = findLastMessageType(messages, 'carousel');
 
-        if (found !== -1) {
-          const key = keys[found];
-          const idx = messages[key].findLastIndex(
-            ({ raw = '' } = {}) => {
-              return raw.includes('carousel');
-            }
-          );
-          let data = {};
-
-          try {
-            data = JSON.parse(messages[key][idx]['raw']);
-          } catch(err) {
-            console.warn(`yahoo-x-bv-player: ${err.message}`);
-          }
-
-          announce = data?.content?.text || '';
-        }
-      }
+      // get lastest broadcasting listing uuid
+      const {
+        content: {
+          id: listingUuid = ''
+        } = {}
+      } = findLastMessageType(messages, 'sellingListing');
 
       chatrooms[id] = {
         chatroomData: data,
         chatroom: Chatroom,
         messages,
         likeCount,
-        announce
+        announce,
+        listingUuid
       };
     } catch (err) {
       console.warn('BV Chatroom init fail.');
@@ -2620,6 +2640,7 @@ const setupChatroom = async (target, config, callbacks) => {
 
   return chatrooms[id] || {};
 };
+
 const updateChatroomLikeCount = (target, count) => {
   const id = getChatroomId(target);
 
@@ -3256,7 +3277,7 @@ export class YahooXBvPlayer extends HTMLElement {
       return;
     }
 
-    const { chatroomData = '', chatroom = '', messages = {}, likeCount = 0, announce = '' } = await setupChatroom(
+    const { chatroomData = '', chatroom = '', messages = {}, likeCount = 0, announce = '', listingUuid = '' } = await setupChatroom(
       this,
       this.chatroomconfig,
       {
@@ -3341,6 +3362,15 @@ export class YahooXBvPlayer extends HTMLElement {
 
       if (content) {
         this.#renderMessage({ message: content, announce: true });
+      }
+    }
+
+    // switch broadcasting listing
+    if (!this.dataset.broadcastingset) {
+      this.dataset.broadcastingset = 'y';
+
+      if (listingUuid) {
+        this.#chatroomMessagesHandler({ raw:`{"type":"sellingListing","content":{"id":"${listingUuid}"}}` });
       }
     }
 

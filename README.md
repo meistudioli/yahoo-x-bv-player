@@ -77,7 +77,7 @@ Put &lt;yahoo-x-bv-player /> into HTML document. It will have different function
           "title": "product title",
           "link": "https://your-domain/product.html",
           "thumbnail": "https://your-domain/img/product.jpg",
-          "price": "9,999",
+          "price": "$ 9,999",
           "bestDiscount": "-40%",
           "marks": {
             "coupon": true,
@@ -412,13 +412,16 @@ Set products' information.
 `title`：Set product's title.\
 `link`：Set product url.\
 `thumbnail`：Set product thumbnail.\
+`price`：Set product price.\
+`marketPrice`：Set product market price（original price）. This key is optional.\
+`priceRange`：Set product price range（min & max）in object format. UI will take this information first（hide price & marketPrice）. This key is optional.\
 `bestDiscount`：Set product best discount. This is optional key.\
 `marks`：Set product marks > **coupon**（Boolean）、**shipping coupon**（Boolean）、**buynow**（Boolean）. This is optional key..\
 `buyCount`：Set product sold count.\
 `broadcasting`：Set product is current broadcasting or not.（Boolean）.
 
 ```html
-<yahoo-x-bv-player products='[{"id":"A1234567890","uuid":"334c6ea9-244e-4a6c-b320-d3506b4d6d91","title":"product title","link":"https://your-domain/product.html","thumbnail":"https://your-domain/img/product.jpg","price":"9,999","bestDiscount":"-40%","marks":{"coupon":true,"shippingCoupon":false,"buynow":true},"buyCount":1,"broadcasting":true}]'>
+<yahoo-x-bv-player products='[{"id":"A1234567890","uuid":"334c6ea9-244e-4a6c-b320-d3506b4d6d91","title":"product title","link":"https://your-domain/product.html","thumbnail":"https://your-domain/img/product.jpg","price":"$ 9,999","bestDiscount":"-40%","marks":{"coupon":true,"shippingCoupon":false,"buynow":true},"buyCount":1,"broadcasting":true}]'>
   ...
 </yahoo-x-bv-player>
 ```
@@ -440,7 +443,7 @@ Set products' information.
 | paused | Boolean | Getter video paused status. |
 | host | Object | Getter / Setter host information. Developers could set `avatar`、`name`、`link`、`count`、`announce` and `follow` here. |
 | l10n | Object | Getter / Setter localization for title or action buttons. Developers could set `previewtrigger`、`listingshead`、`buynow`、`jointhecrowd`、`rushbuying`、`addfavorite`、`sharelive`、`takesnapshot` and `achievetrophy` here. |
-| products | Array | Getter / Setter products' information. Developers could set `id`、`uuid`、`title`、`link`、`thumbnail`、`bestDiscount`、`marks`、`buyCount` and `broadcasting` here. |
+| products | Array | Getter / Setter products' information. Developers could set `id`、`uuid`、`title`、`link`、`thumbnail`、`price`、`marketPrice`、`priceRange`、`bestDiscount`、`marks`、`buyCount` and `broadcasting` here. |
 
 ## Mathods
 | Mathod Signature | Description |
