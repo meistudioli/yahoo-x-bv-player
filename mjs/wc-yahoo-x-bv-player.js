@@ -132,8 +132,8 @@ const fullscreenEnabled = !!document.fullscreenEnabled;
 const keyboardLockEnabled = !!navigator?.keyboard?.lock;
 const pipEnabled = !!document.pictureInPictureEnabled;
 const clearDelay = 2500;
-const trophyMilestones = [5, 10, 20];
-const maxMessageCount = 10;
+const trophyMilestones = [50, 100, 1000];
+const maxMessageCount = 50;
 
 const template = document.createElement('template');
 template.innerHTML = `
