@@ -243,6 +243,9 @@ ${buttons}
   --host-count-font-size: 10px;
   --host-count-text: var(--yahoo-x-bv-player-host-count-text, 'viewers');
 
+  /* poster */
+  --poster-background-color: var(--yahoo-x-bv-player-poster-background-color, rgba(0 0 0));
+
   /* preview */
   --preview-inset-block-start-stuff: 0px;
   --preview-inset-block-start: calc(var(--preview-inset-block-start-stuff) + var(--padding-block-start-basis));
@@ -832,6 +835,7 @@ ${buttons}
       inset: 0;
       inline-size: 100%;
       block-size: 100%;
+      background-color: var(--poster-background-color);
       object-fit: contain;
       pointer-events: none;
       opacity: var(--opacity);
@@ -1276,6 +1280,11 @@ ${buttons}
         opacity: 0;
         scale: 0;
         will-change: opacity, scale;
+
+        &.reaction--show {
+          opacity: 1;
+          scale: 1;
+        }
 
         &[data-active] {
           animation: reaction-in 550ms ease 100ms forwards;
@@ -2137,7 +2146,9 @@ ${buttons}
       <button type="button" class="button button--cancel-refreshing" data-action="cancel-refreshing" data-reverse>cancel refreshing</button>
     </div>
 
-    <div class="reactions"></div>
+    <div class="reactions">
+      <em class="reaction reaction--play reaction--show"></em>
+    </div>
   </div>
 </div>
 
@@ -2445,6 +2456,13 @@ if (CSS?.registerProperty) {
       syntax: '<color>',
       inherits: true,
       initialValue: 'rgba(255 82 13)'
+    });
+
+    CSS.registerProperty({
+      name: '--yahoo-x-bv-player-poster-background-color',
+      syntax: '<color>',
+      inherits: true,
+      initialValue: 'rgba(0 0 0)'
     });
   } catch(err) {
     console.warn(`yahoo-x-bv-player: ${err.message}`);

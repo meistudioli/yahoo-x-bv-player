@@ -230,6 +230,9 @@ yahoo-x-bv-player {
   /* host */
   --yahoo-x-bv-player-host-count-text: 'viewers';
 
+  /* poster */
+  --yahoo-x-bv-player-poster-background-color: rgba(0 0 0);
+
   /* listings' text */
   --yahoo-x-bv-player-broadcasting-text: 'ON AIR';
   --yahoo-x-bv-player-listing-sign-shipping-coupon-text: '運費抵用券';
