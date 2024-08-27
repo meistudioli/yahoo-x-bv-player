@@ -1281,12 +1281,12 @@ ${buttons}
         scale: 0;
         will-change: opacity, scale;
 
-        &.reaction--show {
+        &.reaction--static {
           opacity: 1;
           scale: 1;
         }
 
-        &[data-active] {
+        &[data-active]:not(.reaction--static) {
           animation: reaction-in 550ms ease 100ms forwards;
         }
         
@@ -2146,9 +2146,7 @@ ${buttons}
       <button type="button" class="button button--cancel-refreshing" data-action="cancel-refreshing" data-reverse>cancel refreshing</button>
     </div>
 
-    <div class="reactions">
-      <em class="reaction reaction--play reaction--show"></em>
-    </div>
+    <div class="reactions"></div>
   </div>
 </div>
 
@@ -2174,7 +2172,7 @@ ${buttons}
 
 const templateReaction = document.createElement('template');
 templateReaction.innerHTML = `
-<em class="reaction reaction--{{action}}"></em>
+<em class="reaction reaction--{{action}} {{#isStatic}}reaction--static{{/isStatic}}"></em>
 `;
 
 const templateProducts = document.createElement('template');
@@ -3607,6 +3605,8 @@ export class YahooXBvPlayer extends HTMLElement {
               this.removeAttribute('autoplay');
               player.setVolume(0);
               player.play();
+            } else {
+              this.#reaction('play', true);
             }
           }
         , 500);
@@ -3614,11 +3614,11 @@ export class YahooXBvPlayer extends HTMLElement {
     );
   }
 
-  #reaction(action = 'play') {
+  #reaction(action = 'play', isStatic = false) {
     const { reactions } = this.#nodes;
 
     reactions.replaceChildren();
-    const templateString = Mustache.render(templateReaction.innerHTML, { action });
+    const templateString = Mustache.render(templateReaction.innerHTML, { action, isStatic });
     reactions.insertAdjacentHTML('afterbegin', templateString);
     const reaction = reactions.querySelector('.reaction');
 
