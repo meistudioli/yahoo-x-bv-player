@@ -2646,7 +2646,7 @@ const setupChatroom = async (target, config, callbacks) => {
         chatroom: Chatroom,
         messages,
         likeCount,
-        announce,
+        announce: announce.trim(),
         listingUuid
       };
 
@@ -3375,7 +3375,9 @@ export class YahooXBvPlayer extends HTMLElement {
 
     // show announce
     if (!this.dataset.announce) {
-      const content = announce || this.host?.announce;
+      let content = announce || this.host?.announce;
+
+      content = content.trim();
       this.dataset.announce = 'y';
 
       if (content) {
@@ -3605,7 +3607,7 @@ export class YahooXBvPlayer extends HTMLElement {
               this.removeAttribute('autoplay');
               player.setVolume(0);
               player.play();
-            } else {
+            } else if (this.paused) {
               this.#reaction('play', true);
             }
           }
@@ -4011,6 +4013,10 @@ export class YahooXBvPlayer extends HTMLElement {
   }
 
   #renderMessage({ host = '', message = '', admin = 'n', rushbuying = false, announce = false } = {}) {
+    if (!message) {
+      return;
+    }
+
     const { messages } = this.#nodes;
 
     const id = `message-${_wcl.getRandomIntInclusive(1, 100)}-${_wcl.getRandomIntInclusive(1, 10000)}`;
