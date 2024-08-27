@@ -4013,7 +4013,7 @@ export class YahooXBvPlayer extends HTMLElement {
   }
 
   #renderMessage({ host = '', message = '', admin = 'n', rushbuying = false, announce = false } = {}) {
-    if (!message) {
+    if (!message.trim()) {
       return;
     }
 
