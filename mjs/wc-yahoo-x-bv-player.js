@@ -3,7 +3,8 @@ import { _wccss } from './common-css.js';
 import { colorPalette, buttons } from './fuji-css.js';
 
 import Mustache from './mustache.js';
-import 'https://unpkg.com/@blendvision/player@2.17.0';
+// import 'https://unpkg.com/@blendvision/player@2.17.0';
+import 'https://unpkg.com/@blendvision/player@2.20.0-canary.0';
 import 'https://unpkg.com/@blendvision/chatroom-javascript-sdk/index.min.js';
 // import moment from 'https://unpkg.com/moment/src/moment.js';
 // console.log(moment().format());
@@ -30,7 +31,7 @@ import 'https://unpkg.com/@blendvision/chatroom-javascript-sdk/index.min.js';
 const blankImage = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
 const defaults = {
   playerconfig: {
-    license: '',
+    licenseKey: '',
     title: 'yahoo auction',
     source: []
   },

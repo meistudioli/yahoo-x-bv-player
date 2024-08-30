@@ -29,14 +29,19 @@ Put &lt;yahoo-x-bv-player /> into HTML document. It will have different function
     {
       "type": "live",
       "playerconfig": {
-        "license": "your-BlendVision-player-license",
+        "licenseKey": "your-BlendVision-player-license",
         "title": "Yahoo Auction",
         "source": [
           {
             "type": "video/mp4",
             "src": "https://your-domain/video-source.mp4"
           }
-        ]
+        ],
+        "modulesConfig": {
+          "analytics.resourceId": "<live-id>",
+          "analytics.resourceType": "RESOURCE_TYPE_LIVE_EVENT"
+        },
+        "videoAttributes": {}
       },
       "chatroomconfig": {
         "token": "your.BV.chatroom.token",
@@ -118,7 +123,7 @@ import { YahooXBvPlayer } from 'https://unpkg.com/yahoo-x-bv-player/mjs/wc-yahoo
 const nodeA = document.createElement('yahoo-x-bv-player');
 document.body.appendChild(nodeA);
 nodeA.playerconfig = {
-  license: 'your-BlendVision-player-license',
+  licenseKey: 'your-BlendVision-player-license',
   title: 'Yahoo Auction',
   source: [
     {
@@ -138,7 +143,7 @@ nodeA.loop = true;
 const nodeB = new YahooXBvPlayer();
 document.body.appendChild(nodeB);
 nodeB.playerconfig = {
-  license: 'your-BlendVision-player-license',
+  licenseKey: 'your-BlendVision-player-license',
   title: 'Yahoo Auction',
   source: [
     {
@@ -157,7 +162,7 @@ nodeB.loop = true;
 // new instance with Class & default config
 const config = {
   playerconfig: {
-    license: 'your-BlendVision-player-license',
+    licenseKey: 'your-BlendVision-player-license',
     title: 'Yahoo Auction',
     source: [
       {
@@ -291,12 +296,12 @@ Set type as live or replay. Default is `live`.
 
 Set [BlendVision Web SDK](https://www.blendvision.com/zh-tw) config.
 
-`license`：Set BlendVision player license.\
+`licenseKey`：Set BlendVision player license.\
 `title`：Set title.\
 `source`：Set video sources.
 
 ```html
-<yahoo-x-bv-player playerconfig='{"title":"Yahoo Auction","source":[{"type":"video/mp4","src":"https://your-domain/video-source.mp4"}],"license":"your-BlendVision-player-license"}'>
+<yahoo-x-bv-player playerconfig='{"title":"Yahoo Auction","source":[{"type":"video/mp4","src":"https://your-domain/video-source.mp4"}],"licenseKey":"your-BlendVision-player-license"}'>
   ...
 </yahoo-x-bv-player>
 ```
@@ -435,7 +440,7 @@ Set products' information.
 | Property Name | Type | Description |
 | ----------- | ----------- | ----------- |
 | type | String | Getter / Setter type as `live` or `replay`. |
-| playerconfig | Object | Set BlendVision Web SDK config. Developers could set `license`、`title` and `source` here. |
+| playerconfig | Object | Set BlendVision Web SDK config. Developers could set `licenseKey`、`title` and `source` here. |
 | chatroomconfig | Object | Set BlendVision chatroom SDK config. Developers could set `token`、`refreshToken` and `host` here. |
 | share | Object | Getter / Setter share information. Developers could set `title`、`text` and `url` here. |
 | poster | String | Getter / Setter video poster. |
