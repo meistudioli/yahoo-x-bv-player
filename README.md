@@ -40,8 +40,7 @@ Put &lt;yahoo-x-bv-player /> into HTML document. It will have different function
         "modulesConfig": {
           "analytics.resourceId": "<live-id>",
           "analytics.resourceType": "RESOURCE_TYPE_LIVE_EVENT"
-        },
-        "videoAttributes": {}
+        }
       },
       "chatroomconfig": {
         "token": "your.BV.chatroom.token",

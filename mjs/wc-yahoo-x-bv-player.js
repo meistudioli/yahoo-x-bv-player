@@ -5,8 +5,6 @@ import { colorPalette, buttons } from './fuji-css.js';
 import Mustache from './mustache.js';
 import 'https://unpkg.com/@blendvision/player@2.20.0-canary.1';
 import 'https://unpkg.com/@blendvision/chatroom-javascript-sdk/index.min.js';
-// import moment from 'https://unpkg.com/moment/src/moment.js';
-// console.log(moment().format());
 
 /*
  reference:
@@ -2560,7 +2558,6 @@ const setupChatroom = async (target, config, callbacks) => {
         messages = messages.concat(tmp);
       } while (tmp.length !== 0);
 
-      // const startAt = moment(createdAt);
       const startAt = new Date(createdAt);
       messages = messages.reduce(
         (acc, message = {}) => {
@@ -2576,7 +2573,6 @@ const setupChatroom = async (target, config, callbacks) => {
             return acc;
           }
 
-          // const timeframe = moment(receivedAt).diff(startAt, 'seconds');
           const timeframe = Math.floor((new Date(receivedAt) - startAt) / 1000);
           if (!acc[timeframe]) {
             acc[timeframe] = [];
@@ -3394,10 +3390,26 @@ export class YahooXBvPlayer extends HTMLElement {
       }
     }
 
-    // show join message
+    // show join message & recall latest messages
     if (this.#isLIVE() && !this.dataset.enterroom) {
       this.dataset.enterroom = 'y';
       this.#sendTextMessage('enterRoom', this.l10n.jointhecrowd);
+
+      // recall messages
+      const count = 10;
+      const keys = Object.keys(messages)
+        .sort((a, b) => +a - +b)
+        .slice(count * -1);
+
+      keys.forEach(
+        (key) => {
+          messages[key].forEach(
+            (data) => {
+              this.#chatroomMessagesHandler(data);
+            }
+          );
+        }
+      );
     }
   }
 
