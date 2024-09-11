@@ -192,6 +192,9 @@ yahoo-x-bv-player {
   --yahoo-x-bv-player-padding-inline-basis: 12px;
   --yahoo-x-bv-player-padding-block-end-basis: 8px;
 
+  /* video */
+  --yahoo-x-bv-player-video-object-fit: contain;
+
   /* progress */
   --yahoo-x-bv-player-slider-thumb-color: rgba(234 51 35);
   --yahoo-x-bv-player-slider-thumb-shadow-color: rgba(0 0 0);

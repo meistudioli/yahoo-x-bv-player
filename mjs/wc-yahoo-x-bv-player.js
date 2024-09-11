@@ -193,6 +193,9 @@ ${buttons}
   --padding-block-start: var(--padding-block-start-basis);
   --padding-block-end: var(--padding-block-end-basis);
 
+  /* video */
+  --video-object-fit: var(--yahoo-x-bv-player-video-object-fit, contain);
+
   /* refreshing */
   --refreshing-axis-inline-start: 0%;
   --refreshing-axis-inline-end: 0%;
@@ -463,7 +466,7 @@ ${buttons}
       inline-size: 100%;
       block-size: 100%;
       display: block;
-      object-fit: contain;
+      object-fit: var(--video-object-fit);
       outline: 0 none;
       background-color: rgba(0 0 0);
 
