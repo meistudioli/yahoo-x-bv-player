@@ -53,6 +53,7 @@ const defaults = {
     follow: false,
     announce: ''
   },
+  messagetemplate: [],
   products: [
     /*
       {
@@ -93,7 +94,7 @@ const defaults = {
 };
 
 const booleanAttrs = ['loop', 'autopilot'];
-const objectAttrs = ['playerconfig', 'chatroomconfig', 'share', 'host', 'products', 'l10n'];
+const objectAttrs = ['playerconfig', 'chatroomconfig', 'share', 'host', 'products', 'l10n', 'messagetemplate'];
 const custumEvents = {
   play: 'yahoo-x-bv-player-play',
   pause: 'yahoo-x-bv-player-pause',
@@ -1145,6 +1146,16 @@ ${buttons}
           &:focus {
             font-size: max(16px, var(--live-controls-input-font-size));
           }
+
+          &[list]::-webkit-calendar-picker-indicator {
+            opacity: 0;
+            pointer-events: none;
+          }
+
+          &[list]::-webkit-list-button {
+            opacity: 0;
+            pointer-events: none;
+          }
         }
 
         .button--send {
@@ -2149,6 +2160,8 @@ ${buttons}
 
     <div class="reactions"></div>
   </div>
+
+  <datalist id="message-template"></datalist>
 </div>
 
 <dialog class="fuji-alerts">
@@ -2240,6 +2253,13 @@ templateProducts.innerHTML = `
     </div>
   </a>
 {{/products}}
+`;
+
+const templateMessageTemplate = document.createElement('template');
+templateMessageTemplate.innerHTML = `
+{{#list}}
+  <option value="{{.}}">{{.}}</option>
+{{/list}}
 `;
 
 const templateMessage = document.createElement('template');
@@ -2724,6 +2744,7 @@ export class YahooXBvPlayer extends HTMLElement {
       messages: this.shadowRoot.querySelector('.chatroom__messages'),
       messageForm: this.shadowRoot.querySelector('.live-controls__form'),
       messageInput: this.shadowRoot.querySelector('.live-controls__form__input'),
+      messageTemplate: this.shadowRoot.querySelector('#message-template'),
       liveActions: this.shadowRoot.querySelector('.live-controls__buttons'),
       emotions: this.shadowRoot.querySelector('.live-controls__like__emotions'),
       previewTrigger: this.shadowRoot.querySelector('.preview__trigger'),
@@ -2889,6 +2910,7 @@ export class YahooXBvPlayer extends HTMLElement {
         case 'host':
         case 'share':
         case 'products':
+        case 'messagetemplate':
         case 'chatroomconfig':
         case 'playerconfig': {
           let values;
@@ -2896,7 +2918,8 @@ export class YahooXBvPlayer extends HTMLElement {
             values = JSON.parse(newValue);
           } catch(err) {
             console.warn(`${_wcl.classToTagName(this.constructor.name)}: ${err.message}`);
-            values = { ...defaults[attrName] };
+            // values = { ...defaults[attrName] };
+            values = Array.isArray(defaults[attrName]) ? [ ...defaults[attrName] ] : { ...defaults[attrName] };
           }
 
           if (attrName === 'l10n') {
@@ -2962,6 +2985,21 @@ export class YahooXBvPlayer extends HTMLElement {
 
         // listing button
         buttons.forEach((button) => button.textContent = buynow);
+        break;
+      }
+
+      case 'messagetemplate': {
+        const { messageInput, messageTemplate } = this.#nodes;
+
+        if (this.messagetemplate.length) {
+          messageTemplate.replaceChildren();
+          const messageTemplateString = Mustache.render(templateMessageTemplate.innerHTML, { list: this.messagetemplate });
+          messageTemplate.insertAdjacentHTML('beforeend', messageTemplateString);
+
+          messageInput.setAttribute('list', messageTemplate.id);
+        } else {
+          messageInput.removeAttribute('list');
+        }
         break;
       }
 
@@ -3122,6 +3160,21 @@ export class YahooXBvPlayer extends HTMLElement {
 
   get playerconfig() {
     return this.#config.playerconfig;
+  }
+
+  set messagetemplate(value) {
+    if (value) {
+      const newValue = [
+        ...(typeof value === 'string' ? JSON.parse(value) : value)
+      ];
+      this.setAttribute('messagetemplate', JSON.stringify(newValue));
+    } else {
+      this.removeAttribute('messagetemplate');
+    }
+  }
+
+  get messagetemplate() {
+    return this.#config.messagetemplate;
   }
 
   set products(value) {

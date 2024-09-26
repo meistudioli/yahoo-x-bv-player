@@ -74,6 +74,14 @@ Put &lt;yahoo-x-bv-player /> into HTML document. It will have different function
         "takesnapshot": "took snapshot.",
         "achievetrophy": "achieved {{hits}} likes."
       },
+      "messagetemplate": [
+        "👍",
+        "+1",
+        "被燒🔥",
+        "尺寸？",
+        "材質？",
+        "多少錢？"
+      ],
       "products": [
         {
           "id": "A1234567890",
@@ -413,6 +421,16 @@ Set localization for title or action buttons.
 </yahoo-x-bv-player>
 ```
 
+- **messagetemplate**
+
+Set message template information. Default is `[]`.
+
+```html
+<yahoo-x-bv-player messagetemplate='["👍","+1","被燒🔥","尺寸？","材質？","多少錢？"]'>
+  ...
+</yahoo-x-bv-player>
+```
+
 - **products**
 
 Set products' information.
@@ -453,6 +471,7 @@ Set products' information.
 | paused | Boolean | Getter video paused status. |
 | host | Object | Getter / Setter host information. Developers could set `avatar`、`name`、`link`、`count`、`announce` and `follow` here. |
 | l10n | Object | Getter / Setter localization for title or action buttons. Developers could set `previewtrigger`、`listingshead`、`buynow`、`jointhecrowd`、`rushbuying`、`addfavorite`、`sharelive`、`takesnapshot` and `achievetrophy` here. |
+| messagetemplate | Array | Getter / Setter message template information. Default is `[]`. |
 | products | Array | Getter / Setter products' information. Developers could set `id`、`uuid`、`title`、`link`、`thumbnail`、`price`、`marketPrice`、`priceRange`、`bestDiscount`、`marks`、`buyCount` and `broadcasting` here. |
 
 ## Mathods
