@@ -2708,6 +2708,7 @@ export class YahooXBvPlayer extends HTMLElement {
       userLikeCount: 0,
       likeCount: 0,
       reserveLikeCount: 0,
+      viewCount: 0,
       recallKey: ''
     };
 
@@ -3412,10 +3413,17 @@ export class YahooXBvPlayer extends HTMLElement {
             } = {}
           } = viewerMetrics;
 
+          this.host = {
+            ...this.host,
+            count
+          };
+
           // update only when type: live
+          /*
           if (this.#isLIVE()) {
             this.#nodes.viewCount.textContent = count;
           }
+          */
         }
       }
     );
@@ -3872,8 +3880,13 @@ export class YahooXBvPlayer extends HTMLElement {
       }
 
       case 'playback_video_ended': {
-        // TODO: add live ended style
-        this.#fireEvent(custumEvents.liveEnded);
+        const { chatroomData, likeCount } = this.#data;
+
+        this.#fireEvent(custumEvents.liveEnded, {
+          count: this.host.count,
+          createdAt: chatroomData?.createdAt,
+          likeCount
+        });
         break;
       }
     }

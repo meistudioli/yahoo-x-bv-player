@@ -489,7 +489,7 @@ Set products' information.
 | yahoo-x-bv-player-ended | Fired when video ended. |
 | yahoo-x-bv-player-purchase-click | Fired when product's purchase button clicked. Developers could gather product information through event.detail. |
 | yahoo-x-bv-player-follow-click | Fired when host's follow button clicked. Developers could gather follow information through event.detail. |
-| yahoo-x-bv-player-live-ended | Fired when LIVE ended. |
+| yahoo-x-bv-player-live-ended | Fired when LIVE ended. Developers could gather count、createdAt and likeCount information through event.detail. |
 
 ## Reference
 - [BlendVision Web SDK](https://www.blendvision.com/zh-tw)
