@@ -3636,7 +3636,22 @@ export class YahooXBvPlayer extends HTMLElement {
     }
 
     // player
-    const player = window.BlendVision.createPlayer(container, this.playerconfig);
+    const player = window.BlendVision.createPlayer(container, {
+      ...this.playerconfig,
+      onPlaylogFired: (eventType = '') => {
+        // LIVE ended
+        if (eventType === 'playback_video_ended') {
+          const { chatroomData, likeCount } = this.#data;
+
+          this.#fireEvent(custumEvents.liveEnded, {
+            count: this.host.count,
+            createdAt: chatroomData?.createdAt,
+            likeCount
+          });
+        }
+      }
+    });
+
     this.#data.player = player;
 
     requestAnimationFrame(
@@ -3662,7 +3677,7 @@ export class YahooXBvPlayer extends HTMLElement {
         // events
         this.#data.controllerForVideo = new AbortController();
         const signal = this.#data.controllerForVideo.signal;
-        const playerEvents = ['canplay', 'ended', 'progress', 'timeupdate', 'play', 'pause', 'volumechange', 'seeking', 'playback_video_ended'];
+        const playerEvents = ['canplay', 'ended', 'progress', 'timeupdate', 'play', 'pause', 'volumechange', 'seeking'];
 
         playerEvents.forEach((event) => player.addEventListener(event, this._playerEventsHandler));
         video.addEventListener('click', this._onStageClick , { signal });
@@ -3876,17 +3891,6 @@ export class YahooXBvPlayer extends HTMLElement {
           
           progressBuffer.value = loaded || 0;
         }
-        break;
-      }
-
-      case 'playback_video_ended': {
-        const { chatroomData, likeCount } = this.#data;
-
-        this.#fireEvent(custumEvents.liveEnded, {
-          count: this.host.count,
-          createdAt: chatroomData?.createdAt,
-          likeCount
-        });
         break;
       }
     }
