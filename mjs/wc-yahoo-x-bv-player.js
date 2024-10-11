@@ -3,6 +3,7 @@ import { _wccss } from './common-css.js';
 import { colorPalette, buttons } from './fuji-css.js';
 
 import Mustache from './mustache.js';
+import 'https://unpkg.com/@blendvision/link@0.0.2';
 import 'https://unpkg.com/@blendvision/player@2.20.0';
 import 'https://unpkg.com/@blendvision/chatroom-javascript-sdk/index.min.js';
 
@@ -11,6 +12,7 @@ import 'https://unpkg.com/@blendvision/chatroom-javascript-sdk/index.min.js';
  - https://developers.blendvision.com/zh/docs/player/web-sdk/quick-start
  - https://developers.blendvision.com/zh/docs/sdk/player/web/intro
  - https://www.npmjs.com/package/@blendvision/chatroom-javascript-sdk
+ - https://www.npmjs.com/package/@blendvision/link
  - https://developer.chrome.com/docs/web-platform/document-picture-in-picture
  - https://developer.mozilla.org/en-US/docs/Web/API/Picture-in-Picture_API
  - https://developer.mozilla.org/en-US/docs/Web/API/Fullscreen_API
@@ -29,6 +31,7 @@ const blankImage = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALA
 const defaults = {
   playerconfig: {
     licenseKey: '',
+    playbackToken: '',
     title: 'yahoo auction',
     source: []
   },
@@ -2919,7 +2922,6 @@ export class YahooXBvPlayer extends HTMLElement {
             values = JSON.parse(newValue);
           } catch(err) {
             console.warn(`${_wcl.classToTagName(this.constructor.name)}: ${err.message}`);
-            // values = { ...defaults[attrName] };
             values = Array.isArray(defaults[attrName]) ? [ ...defaults[attrName] ] : { ...defaults[attrName] };
           }
 
@@ -3622,7 +3624,7 @@ export class YahooXBvPlayer extends HTMLElement {
   }
   */
 
-  #setupPlayer() {
+  async #setupPlayer() {
     const { container } = this.#nodes;
 
     // remove exist
@@ -3633,6 +3635,17 @@ export class YahooXBvPlayer extends HTMLElement {
 
       this.#data.player.release();
       container.replaceChildren();
+    }
+
+    // playbackSession
+    if (this.playerconfig?.playbackToken && !this.#data.playbackSession) {
+      try {
+        this.#data.playbackSession = await window.BlendVisionLinkSDK.startPlaybackSession({
+          token: this.playerconfig?.playbackToken
+        });
+      } catch(err) {
+        console.warn(`${_wcl.classToTagName(this.constructor.name)}: ${err.message}`);
+      }
     }
 
     // player
