@@ -2235,7 +2235,7 @@ templateProducts.innerHTML = `
           <mark class="listings__unit__mark listings__unit__mark--buynow"></mark>
         {{/marks.buynow}}
 
-        {{marks.bid}}
+        {{#marks.bid}}
           <mark class="listings__unit__mark listings__unit__mark--bid"></mark>
         {{/marks.bid}}
       </div>
