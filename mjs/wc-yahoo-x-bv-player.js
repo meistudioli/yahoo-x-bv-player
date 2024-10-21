@@ -4,6 +4,7 @@ import { colorPalette, buttons } from './fuji-css.js';
 
 import Mustache from './mustache.js';
 import 'https://unpkg.com/@blendvision/link@0.0.2';
+// import 'https://unpkg.com/@blendvision/player@2.20.0';
 import 'https://unpkg.com/@blendvision/player@2.21.0-canary.1';
 import 'https://unpkg.com/@blendvision/chatroom-javascript-sdk/index.min.js';
 
@@ -2234,9 +2235,9 @@ templateProducts.innerHTML = `
           <mark class="listings__unit__mark listings__unit__mark--buynow"></mark>
         {{/marks.buynow}}
 
-        {{^marks.buynow}}
+        {{marks.bid}}
           <mark class="listings__unit__mark listings__unit__mark--bid"></mark>
-        {{/marks.buynow}}
+        {{/marks.bid}}
       </div>
       <div class="listings__unit__actions">
         <span class="listings__unit__actions__span">{{#buyCount}}{{buyCount}}{{/buyCount}}</span>
