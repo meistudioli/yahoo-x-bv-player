@@ -26,6 +26,7 @@ import 'https://unpkg.com/@blendvision/chatroom-javascript-sdk/index.min.js';
  - https://css-tricks.com/a-dry-approach-to-color-themes-in-css/
  - https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
  - https://web.dev/articles/offscreen-canvas
+ - https://developer.mozilla.org/en-US/docs/Web/API/WebSocket
 */
 
 const blankImage = 'data:image/gif;base64,R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==';
@@ -40,6 +41,9 @@ const defaults = {
     token: '',
     refreshToken: '',
     host: 'https://api.one.blendvision.com'
+  },
+  ysocket: {
+    // id, url
   },
   share: {
     title: document.title,
@@ -76,7 +80,8 @@ const defaults = {
         "marks": {
           "coupon": false,
           "shippingCoupon": false,
-          "buynow": true
+          "buynow": true,
+          "bid": false
         },
         "buyCount": 0,
         "broadcasting": true
@@ -93,12 +98,17 @@ const defaults = {
     addfavorite: 'added host as favorite.',
     sharelive: 'shared this LIVE.',
     takesnapshot: 'took snapshot.',
-    achievetrophy: 'achieved {{hits}} likes.'
+    achievetrophy: 'achieved {{hits}} likes.',
+    highestbid: 'bid ${{price}} and become the highest bidder.',
+    exceededbid: 'Someone has exceeded your last bid price ${{price}}.',
+    wonbid: 'won the bid as price ${{price}}.',
+    cancelledplacebid: 'Owner canceled {{nickname}}\'s bid.',
+    placebid: 'has place bid as price ${{price}}.'
   }
 };
 
 const booleanAttrs = ['loop', 'autopilot'];
-const objectAttrs = ['playerconfig', 'chatroomconfig', 'share', 'host', 'products', 'l10n', 'messagetemplate'];
+const objectAttrs = ['playerconfig', 'chatroomconfig', 'ysocket', 'share', 'host', 'products', 'l10n', 'messagetemplate'];
 const custumEvents = {
   play: 'yahoo-x-bv-player-play',
   pause: 'yahoo-x-bv-player-pause',
@@ -106,7 +116,8 @@ const custumEvents = {
   ended: 'yahoo-x-bv-player-ended',
   purchaseClick: 'yahoo-x-bv-player-purchase-click',
   followClick: 'yahoo-x-bv-player-follow-click',
-  liveEnded: 'yahoo-x-bv-player-live-ended'
+  liveEnded: 'yahoo-x-bv-player-live-ended',
+  addProduct: 'yahoo-x-bv-player-add-product'
 };
 const legalKey = [
   'k',
@@ -2706,6 +2717,7 @@ export class YahooXBvPlayer extends HTMLElement {
     this.#data = {
       controller: '',
       controllerForVideo: '',
+      controllerForSocket: '',
       tid: '',
       tidForDigestEmotions: '',
       trophyMilestones,
@@ -2782,6 +2794,7 @@ export class YahooXBvPlayer extends HTMLElement {
     this._onMessageSubmit = this._onMessageSubmit.bind(this);
     this._onEmotionAnimationend = this._onEmotionAnimationend.bind(this);
     this._onButtonFollowClick = this._onButtonFollowClick.bind(this);
+    this._socketEventsHandler = this._socketEventsHandler.bind(this);
   }
 
   async connectedCallback() {
@@ -2895,6 +2908,14 @@ export class YahooXBvPlayer extends HTMLElement {
       this.#data.controllerForVideo.abort();
     }
 
+    if (this.#data.controllerForSocket) {
+      this.#data.controllerForSocket.abort();
+    }
+
+    if (this.#data?.socket?.close) {
+      this.#data.socket.close();
+    }
+
     if (this.#data.player) {
       this.#data.player.release();
     }
@@ -2917,6 +2938,7 @@ export class YahooXBvPlayer extends HTMLElement {
         case 'products':
         case 'messagetemplate':
         case 'chatroomconfig':
+        case 'ysocket':
         case 'playerconfig': {
           let values;
           try {
@@ -2966,6 +2988,11 @@ export class YahooXBvPlayer extends HTMLElement {
     this.#format(attrName, oldValue, newValue);
 
     switch (attrName) {
+      case 'ysocket': {
+        this.#setupSocket();
+        break;
+      }
+
       case 'chatroomconfig': {
         await this.#setupChatroom();
         break;
@@ -3130,6 +3157,23 @@ export class YahooXBvPlayer extends HTMLElement {
 
   get l10n() {
     return this.#config.l10n;
+  }
+
+  set ysocket(value) {
+    if (value) {
+      const newValue = {
+        ...defaults.ysocket,
+        ...this.ysocket,
+        ...(typeof value === 'string' ? JSON.parse(value) : value)
+      };
+      this.setAttribute('ysocket', JSON.stringify(newValue));
+    } else {
+      this.removeAttribute('ysocket');
+    }
+  }
+
+  get ysocket() {
+    return this.#config.ysocket;
   }
 
   set chatroomconfig(value) {
@@ -3342,6 +3386,32 @@ export class YahooXBvPlayer extends HTMLElement {
     }
 
     return time.join(':');
+  }
+
+  #setupSocket() {
+    const { id = '', url = '' } = this.ysocket;
+
+    if (!id && !url) {
+      return;
+    }
+
+    // cancel exist socket
+    if (this.#data?.socket?.close) {
+      this.#data.socket.close();
+    }
+
+    if (this.#data.controllerForSocket) {
+      this.#data.controllerForSocket.abort();
+    }
+
+    // events
+    this.#data.controllerForSocket = new AbortController();
+    const signal = this.#data.controllerForSocket.signal;
+    const events = ['open', 'message', 'error'];
+
+    const socket = new window.WebSocket(url);
+    events.forEach((event) => socket.addEventListener(event, this._socketEventsHandler, { signal }));
+    this.#data.socket = socket;
   }
 
   async #setupChatroom() {
@@ -4253,6 +4323,88 @@ export class YahooXBvPlayer extends HTMLElement {
 
     if (this.#isLIVE() && !followed) {
       this.#sendTextMessage('favoriteHost', this.l10n.addfavorite);
+    }
+  }
+
+  #socketMessageHandler(data) {
+    const { messages = [] } = data;
+    const message = messages[0] || {};
+    const {
+      type = '',
+      attribute: {
+        nickname = '',
+        price = '',
+        listingId = ''
+      } = {}
+    } = message;
+
+    switch (type) {
+      case 'highestBid': {
+        this.#renderMessage({ host: nickname, message: this.l10n.highestbid.replace(/\{\{price\}\}/g, price) });
+        break;
+      }
+
+      case 'exceededBid': {
+        this.#renderMessage({ message: this.l10n.exceededbid.replace(/\{\{price\}\}/g, price) });
+        break;
+      }
+
+      case 'wonBid': {
+        this.#renderMessage({ host: nickname, message: this.l10n.wonbid.replace(/\{\{price\}\}/g, price) });
+        break;
+      }
+
+      case 'cancelledPlaceBid': {
+        this.#renderMessage({ message: this.l10n.cancelledplacebid.replace(/\{\{nickname\}\}/g, nickname) });
+        break;
+      }
+
+      case 'placeBid': {
+        this.#renderMessage({ host: nickname, message: this.l10n.placebid.replace(/\{\{price\}\}/g, price) });
+        break;
+      }
+
+      case 'addListing': {
+        this.#fireEvent(custumEvents.addProduct, { id: listingId });
+        break;
+      }
+    }
+  }
+
+  _socketEventsHandler(evt) {
+    const { type } = evt;
+    const { socket } = this.#data;
+
+    switch (type) {
+      case 'open': {
+        const { id } = this.ysocket;
+        const data = {
+          action: 'join',
+          chatRoom: {
+            id
+          }
+        };
+
+        socket.send(JSON.stringify(data));
+        break;
+      }
+
+      case 'message': {
+        const { data = '{}' } = evt;
+
+        try {
+          const payload = JSON.parse(data);
+          this.#socketMessageHandler(payload);
+        } catch(err) {
+          console.warn(`${_wcl.classToTagName(this.constructor.name)}: ${err.message}`);
+        }
+        break;
+      }
+
+      case 'error': {
+        console.warn(`${_wcl.classToTagName(this.constructor.name)} socket: ${evt}`);
+        break;
+      }
     }
   }
 

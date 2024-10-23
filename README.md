@@ -29,7 +29,7 @@ Put &lt;yahoo-x-bv-player /> into HTML document. It will have different function
     {
       "type": "live",
       "playerconfig": {
-        "licenseKey": "your-BlendVision-player-license",
+        "licenseKey": "<your-BlendVision-player-license>",
         "playbackToken": "<playbackToken>",
         "title": "Yahoo Auction",
         "source": [
@@ -47,6 +47,10 @@ Put &lt;yahoo-x-bv-player /> into HTML document. It will have different function
         "token": "your.BV.chatroom.token",
         "refreshToken": "your.BV.chatroom.refreshToken",
         "host": "https://api.one.blendvision.com"
+      },
+      "ysocket": {
+        "id": "<your-yahoo-web-socket-id>",
+        "url": "<your-yahoo-web-socket-url>"
       },
       "share": {
         "title": "Yahoo X BlendVision",
@@ -95,7 +99,8 @@ Put &lt;yahoo-x-bv-player /> into HTML document. It will have different function
           "marks": {
             "coupon": true,
             "shippingCoupon": false,
-            "buynow": true
+            "buynow": true,
+            "bid": false
           },
           "buyCount": 1,
           "broadcasting": true
@@ -335,6 +340,19 @@ Set [BlendVision chatroom SDK](https://www.npmjs.com/package/@blendvision/chatro
 </yahoo-x-bv-player>
 ```
 
+- **ysocket**
+
+Set Yahoo socket config. This key is optional.
+
+`id`：Set id for yahoo socket.\
+`url`：Set url for yahoo socket.
+
+```html
+<yahoo-x-bv-player ysocket='{"id":"your.yahoo.web.socket.id","url":"your.yahoo.web.socket.url"}'>
+  ...
+</yahoo-x-bv-player>
+```
+
 - **share**
 
 Set share information.
@@ -418,7 +436,12 @@ Set localization for title or action buttons.
 `addfavorite`：Set message when user added host as his / her favorite.\
 `sharelive`：Set message when user shared LIVE.\
 `takesnapshot`：Set message when user took a snapshot.\
-`achievetrophy`：Set message when user achieved like count trophy.
+`achievetrophy`：Set message when user achieved like count trophy.\
+`highestbid`：Set message when highest bidder occured.\
+`exceededbid`：Set message when bid price has been exceeded.\
+`wonbid`：Set message when won bid.\
+`cancelledplacebid`：Set message when owner canceled someone's bid.\
+`placebid`：Set message when someone place bid.\
 
 ```html
 <yahoo-x-bv-player l10n='{"previewtrigger":"View","listingshead":"Products","buynow":"BUY NOW","jointhecrowd":"joined the crowd.","rushbuying":"is rush buying.","addfavorite":"added host as favorite.","sharelive":"shared this LIVE.","takesnapshot":"took snapshot.","achievetrophy":"achieved {{hits}} likes."}'>
@@ -449,7 +472,7 @@ Set products' information.
 `marketPrice`：Set product market price（original price）. This key is optional.\
 `priceRange`：Set product price range（min & max）in object format. UI will take this information first（hide price & marketPrice）. This key is optional.\
 `bestDiscount`：Set product best discount. This is optional key.\
-`marks`：Set product marks > **coupon**（Boolean）、**shipping coupon**（Boolean）、**buynow**（Boolean）. This is optional key..\
+`marks`：Set product marks > **coupon**（Boolean）、**shipping coupon**（Boolean）、**buynow**（Boolean）、**bid**（Boolean）. This is optional key..\
 `buyCount`：Set product sold count.\
 `broadcasting`：Set product is current broadcasting or not.（Boolean）.
 
@@ -495,6 +518,7 @@ Set products' information.
 | yahoo-x-bv-player-purchase-click | Fired when product's purchase button clicked. Developers could gather product information through event.detail. |
 | yahoo-x-bv-player-follow-click | Fired when host's follow button clicked. Developers could gather follow information through event.detail. |
 | yahoo-x-bv-player-live-ended | Fired when LIVE ended. Developers could gather count、createdAt and likeCount information through event.detail. |
+| yahoo-x-bv-player-add-product | Fired when user add product. Developers could gather id information through event.detail. |
 
 ## Reference
 - [BlendVision Web SDK](https://www.blendvision.com/zh-tw)
