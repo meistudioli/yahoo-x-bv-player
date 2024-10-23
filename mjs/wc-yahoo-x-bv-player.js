@@ -2725,7 +2725,8 @@ export class YahooXBvPlayer extends HTMLElement {
       likeCount: 0,
       reserveLikeCount: 0,
       viewCount: 0,
-      recallKey: ''
+      recallKey: '',
+      socket: ''
     };
 
     // nodes
@@ -2912,7 +2913,7 @@ export class YahooXBvPlayer extends HTMLElement {
       this.#data.controllerForSocket.abort();
     }
 
-    if (this.#data?.socket?.close) {
+    if (this.#data.socket?.close) {
       this.#data.socket.close();
     }
 
@@ -3396,7 +3397,7 @@ export class YahooXBvPlayer extends HTMLElement {
     }
 
     // cancel exist socket
-    if (this.#data?.socket?.close) {
+    if (this.#data.socket?.close) {
       this.#data.socket.close();
     }
 
@@ -3510,7 +3511,7 @@ export class YahooXBvPlayer extends HTMLElement {
     if (!this.dataset.announce) {
       let content = announce || this.host?.announce;
 
-      content = content.trim();
+      content = content?.trim();
       this.dataset.announce = 'y';
 
       if (content) {
