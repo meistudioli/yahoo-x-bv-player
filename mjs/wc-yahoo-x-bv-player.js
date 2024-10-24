@@ -3496,10 +3496,10 @@ export class YahooXBvPlayer extends HTMLElement {
           const {
             user: {
               id: userId
-            } = {},
+            },
             chatroom: {
               blockedUsers = []
-            } = {}
+            }
           } = this.#data.chatroomData;
 
           const exist = blockedUsers.findIndex(({ id: blockUserId }) => id === blockUserId);
@@ -3524,10 +3524,10 @@ export class YahooXBvPlayer extends HTMLElement {
           const {
             user: {
               id: userId
-            } = {},
+            },
             chatroom: {
               blockedUsers = []
-            } = {}
+            }
           } = this.#data.chatroomData;
 
           const blockedUsersN = blockedUsers.filter(({ id: blockUserId }) => blockUserId !== id);
@@ -3614,10 +3614,10 @@ export class YahooXBvPlayer extends HTMLElement {
     const {
       user: {
         id: userId
-      } = {},
+      },
       chatroom: {
         blockedUsers = []
-      } = {}
+      }
     } = chatroomData;
     const found = blockedUsers.findIndex(({ id }) => id === userId);
     this.#nodes.messageForm.inert = found !== -1;
