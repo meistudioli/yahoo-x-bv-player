@@ -441,7 +441,7 @@ Set localization for title or action buttons.
 `exceededbid`：Set message when bid price has been exceeded.\
 `wonbid`：Set message when won bid.\
 `cancelledplacebid`：Set message when owner canceled someone's bid.\
-`placebid`：Set message when someone place bid.\
+`placebid`：Set message when someone place bid.
 
 ```html
 <yahoo-x-bv-player l10n='{"previewtrigger":"View","listingshead":"Products","buynow":"BUY NOW","jointhecrowd":"joined the crowd.","rushbuying":"is rush buying.","addfavorite":"added host as favorite.","sharelive":"shared this LIVE.","takesnapshot":"took snapshot.","achievetrophy":"achieved {{hits}} likes."}'>

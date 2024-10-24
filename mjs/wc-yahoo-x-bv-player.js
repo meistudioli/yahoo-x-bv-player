@@ -2701,6 +2701,14 @@ const updateChatroomLikeCount = (target, count) => {
   }
 };
 
+const updateChatroomBlockUser = (target, blockedUsers = []) => {
+  const id = getChatroomId(target);
+  
+  if (chatrooms[id]) {
+    chatrooms[id].chatroomData.chatroom.blockedUsers = [...blockedUsers];
+  }
+};
+
 export class YahooXBvPlayer extends HTMLElement {
   #data;
   #nodes;
@@ -3456,7 +3464,6 @@ export class YahooXBvPlayer extends HTMLElement {
           this.#data.reserveLikeCount++;
           this.#digestEmotions();
         },
-
         onCustomCounterUpdateReceived: ({ user = {}, customCounter = {} } = {}) => {
           const { customName = '' } = user;
           const { key = '', value = 0 } = customCounter;
@@ -3479,6 +3486,59 @@ export class YahooXBvPlayer extends HTMLElement {
         },
         onViewerInfoReceived: () => {
           // console.log('onViewerInfoReceived', packet);
+        },
+        onBlockUserReceived: ({ blockUnblockMessage = {} } = {}) => {
+          const {
+            user: {
+              id = ''
+            }
+          } = blockUnblockMessage;
+          const {
+            user: {
+              id: userId
+            } = {},
+            chatroom: {
+              blockedUsers = []
+            } = {}
+          } = this.#data.chatroomData;
+
+          const exist = blockedUsers.findIndex(({ id: blockUserId }) => id === blockUserId);
+          if (exist === -1) {
+            blockedUsers.push({ ...blockUnblockMessage.user });
+          }
+          
+          // set form[inert]
+          const found = blockedUsers.findIndex(({ id }) => id === userId);
+          this.#nodes.messageForm.inert = found !== -1;
+
+          // update storage
+          this.#data.chatroomData.chatroom.blockedUsers = [...blockedUsers];
+          updateChatroomBlockUser(this, blockedUsers);
+        },
+        onUnblockUserReceived: ({ blockUnblockMessage = {} } = {}) => {
+          const {
+            user: {
+              id = ''
+            }
+          } = blockUnblockMessage;
+          const {
+            user: {
+              id: userId
+            } = {},
+            chatroom: {
+              blockedUsers = []
+            } = {}
+          } = this.#data.chatroomData;
+
+          const blockedUsersN = blockedUsers.filter(({ id: blockUserId }) => blockUserId !== id);
+
+          // set form[inert]
+          const found = blockedUsersN.findIndex(({ id }) => id === userId);
+          this.#nodes.messageForm.inert = found !== -1;
+
+          // update storage
+          this.#data.chatroomData.chatroom.blockedUsers = [...blockedUsersN];
+          updateChatroomBlockUser(this, blockedUsersN);
         },
         onBroadcastReceived: ({ viewerMetrics = {} } = {}) => {
           const {
@@ -3549,6 +3609,18 @@ export class YahooXBvPlayer extends HTMLElement {
         }
       );
     }
+
+    // form[inert] when user in blockUsers
+    const {
+      user: {
+        id: userId
+      } = {},
+      chatroom: {
+        blockedUsers = []
+      } = {}
+    } = chatroomData;
+    const found = blockedUsers.findIndex(({ id }) => id === userId);
+    this.#nodes.messageForm.inert = found !== -1;
   }
 
   #chatroomMessagesHandler({ user = {}, raw }) {
