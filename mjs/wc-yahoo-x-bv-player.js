@@ -3985,7 +3985,9 @@ export class YahooXBvPlayer extends HTMLElement {
         progressDuration.value = currentTime;
         timePassed.textContent = this.#timeFormat(currentTime);
 
-        this.dataset.t = currentTime;
+        if (currentTime !== 0) {
+          this.dataset.t = currentTime;
+        }
 
         this.#recallMessages(currentTime);
         break;
