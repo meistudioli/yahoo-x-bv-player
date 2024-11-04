@@ -2196,7 +2196,7 @@ ${buttons}
       <div class="listings"></div>
     </div>
   </form>
-</dialg>
+</dialog>
 `;
 
 const templateReaction = document.createElement('template');
@@ -4415,17 +4415,17 @@ export class YahooXBvPlayer extends HTMLElement {
 
     switch (type) {
       case 'highestBid': {
-        this.#renderMessage({ host: nickname, message: this.l10n.highestbid.replace(/\{\{price\}\}/g, price) });
+        this.#renderMessage({ host: nickname, message: this.l10n.highestbid.replace(/\{\{price\}\}/g, +price) });
         break;
       }
 
       case 'exceededBid': {
-        this.#renderMessage({ message: this.l10n.exceededbid.replace(/\{\{price\}\}/g, price) });
+        this.#renderMessage({ message: this.l10n.exceededbid.replace(/\{\{price\}\}/g, +price) });
         break;
       }
 
       case 'wonBid': {
-        this.#renderMessage({ host: nickname, message: this.l10n.wonbid.replace(/\{\{price\}\}/g, price) });
+        this.#renderMessage({ host: nickname, message: this.l10n.wonbid.replace(/\{\{price\}\}/g, +price) });
         break;
       }
 
@@ -4435,7 +4435,7 @@ export class YahooXBvPlayer extends HTMLElement {
       }
 
       case 'placeBid': {
-        this.#renderMessage({ host: nickname, message: this.l10n.placebid.replace(/\{\{price\}\}/g, price) });
+        this.#renderMessage({ host: nickname, message: this.l10n.placebid.replace(/\{\{price\}\}/g, +price) });
         break;
       }
 
