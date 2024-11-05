@@ -369,6 +369,8 @@ ${buttons}
   /* safe area */
   &:fullscreen,
   &[data-fullscreen=true] {
+    --video-object-fit: contain;
+
     .host,
     .chatroom {
       --padding-inline: max(var(--padding-inline-basis), var(--safe-area-left));
