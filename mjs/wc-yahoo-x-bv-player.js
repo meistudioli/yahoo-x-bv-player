@@ -4,7 +4,7 @@ import { colorPalette, buttons } from './fuji-css.js';
 
 import Mustache from './mustache.js';
 import 'https://unpkg.com/@blendvision/link@0.0.2';
-import 'https://unpkg.com/@blendvision/player@2.20.4';
+import 'https://unpkg.com/@blendvision/player@2.20.6';
 // import 'https://unpkg.com/@blendvision/player@2.21.0-canary.1';
 import 'https://unpkg.com/@blendvision/chatroom-javascript-sdk/index.min.js';
 
@@ -2928,6 +2928,7 @@ export class YahooXBvPlayer extends HTMLElement {
     }
 
     if (this.#data.player) {
+      this.#data.player.modules.analytics.pause();
       this.#data.player.release();
     }
   }
