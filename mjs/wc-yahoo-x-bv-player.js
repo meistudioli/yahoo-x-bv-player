@@ -3407,19 +3407,19 @@ export class YahooXBvPlayer extends HTMLElement {
       return;
     }
 
-    // cancel exist socket
-    if (this.#data.socket?.close) {
-      this.#data.socket.close();
-    }
-
+    // cancel exist socket (remove listener first)
     if (this.#data.controllerForSocket) {
       this.#data.controllerForSocket.abort();
+    }
+
+    if (this.#data.socket?.close) {
+      this.#data.socket.close();
     }
 
     // events
     this.#data.controllerForSocket = new AbortController();
     const signal = this.#data.controllerForSocket.signal;
-    const events = ['open', 'message', 'error'];
+    const events = ['open', 'message', 'error', 'close'];
 
     const socket = new window.WebSocket(url);
     events.forEach((event) => socket.addEventListener(event, this._socketEventsHandler, { signal }));
@@ -4482,6 +4482,10 @@ export class YahooXBvPlayer extends HTMLElement {
       case 'error': {
         console.warn(`${_wcl.classToTagName(this.constructor.name)} socket: ${evt}`);
         break;
+      }
+
+      case 'close': {
+        this.#setupSocket();
       }
     }
   }
