@@ -3855,7 +3855,7 @@ export class YahooXBvPlayer extends HTMLElement {
         // autoplay stuff (web component should set attribute "autoplay")
         setTimeout(
           () => {
-            if (this.hasAttribute('autoplay')) {
+            if (this.hasAttribute('autoplay') && !this.classList.contains('msc-any-pip-cloned')) {
               this.removeAttribute('autoplay');
               player.setVolume(0);
               player.play();
