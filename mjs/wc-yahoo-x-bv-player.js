@@ -2929,6 +2929,9 @@ export class YahooXBvPlayer extends HTMLElement {
     }
 
     if (this.#data.player) {
+      if (this.paused) {
+        this.#data.player.pause();
+      }
       this.#data.player.modules.analytics.pause();
       this.#data.player.release();
     }
@@ -3551,17 +3554,13 @@ export class YahooXBvPlayer extends HTMLElement {
             } = {}
           } = viewerMetrics;
 
-          this.host = {
-            ...this.host,
-            count
-          };
-
           // update only when type: live
-          /*
           if (this.#isLIVE()) {
-            this.#nodes.viewCount.textContent = count;
+            this.host = {
+              ...this.host,
+              count
+            };
           }
-          */
         }
       }
     );
@@ -3781,6 +3780,10 @@ export class YahooXBvPlayer extends HTMLElement {
         this.#data.controllerForVideo.abort();
       }
 
+      if (this.paused) {
+        this.#data.player.pause();
+      }
+
       this.#data.player.release();
       container.replaceChildren();
     }
@@ -3829,6 +3832,7 @@ export class YahooXBvPlayer extends HTMLElement {
 
         video.playsinline = true;
         video.controls = false;
+        video.autoplay = false;
 
         // picture in picture
         if (this.#data.anyPipEnable || !pipEnabled) {
@@ -3855,6 +3859,8 @@ export class YahooXBvPlayer extends HTMLElement {
         // autoplay stuff (web component should set attribute "autoplay")
         setTimeout(
           () => {
+            video.pause();
+
             if (this.hasAttribute('autoplay') && !this.classList.contains('msc-any-pip-cloned')) {
               this.removeAttribute('autoplay');
               player.setVolume(0);
