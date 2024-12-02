@@ -2842,12 +2842,10 @@ export class YahooXBvPlayer extends HTMLElement {
     }
 
     // do not init once checkVisibility: false
-    if (!this.checkVisibility({
-      contentVisibilityAuto: true,
-      opacityProperty: true,
-      visibilityProperty: true })
+    if (
+      this.classList.contains('msc-any-pip-cloned') ||
+      !this.checkVisibility?.({ contentVisibilityAuto: true, opacityProperty: true, visibilityProperty: true })
     ) {
-      console.log('mei');
       return;
     }
 
