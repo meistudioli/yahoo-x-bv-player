@@ -2841,6 +2841,16 @@ export class YahooXBvPlayer extends HTMLElement {
       };
     }
 
+    // do not init once checkVisibility: false
+    if (!this.checkVisibility({
+      contentVisibilityAuto: true,
+      opacityProperty: true,
+      visibilityProperty: true })
+    ) {
+      console.log('mei');
+      return;
+    }
+
     // picture in picture
     const anyPipEnable = !!window.documentPictureInPicture && this.parentNode.tagName.toLocaleLowerCase() === 'msc-any-pip';
     this.#data.anyPipEnable = anyPipEnable;
