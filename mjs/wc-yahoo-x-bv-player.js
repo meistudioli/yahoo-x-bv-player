@@ -3005,7 +3005,11 @@ export class YahooXBvPlayer extends HTMLElement {
   }
 
   async attributeChangedCallback(attrName, oldValue, newValue) {
-    if (!YahooXBvPlayer.observedAttributes.includes(attrName)) {
+    if (
+      !YahooXBvPlayer.observedAttributes.includes(attrName) ||
+      this.classList.contains('msc-any-pip-cloned') ||
+      !this.checkVisibility?.({ contentVisibilityAuto: true, opacityProperty: true, visibilityProperty: true })
+    ) {
       return;
     }
 
