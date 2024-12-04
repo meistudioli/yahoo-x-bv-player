@@ -173,9 +173,9 @@ Object.defineProperties(_wcl, {
     value: function(element) {
       let result = true;
 
-      if (!element.checkVisibility) {
+      if (element.checkVisibility) {
         result = element.checkVisibility({ contentVisibilityAuto:true, opacityProperty:true, visibilityProperty:true });
-      } else if (!element.computedStyleMap) {
+      } else if (element.computedStyleMap) {
         const allComputedStyles = element.computedStyleMap();
         const { value: display } = allComputedStyles.get('display');
         const { value: opacity } = allComputedStyles.get('opacity');
