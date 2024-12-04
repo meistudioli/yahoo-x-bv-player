@@ -184,7 +184,7 @@ Object.defineProperties(_wcl, {
 
         result =
           opacity === 0 || 
-          display === 'none' || 
+          ['none', 'contents'].includes(display) ||
           visibility === 'hidden' || 
           contentVisibility === 'auto'
             ? false
@@ -198,7 +198,7 @@ Object.defineProperties(_wcl, {
 
         result =
           +opacity === 0 || 
-          display === 'none' || 
+          ['none', 'contents'].includes(display) ||
           visibility === 'hidden' || 
           contentVisibility === 'auto'
             ? false
