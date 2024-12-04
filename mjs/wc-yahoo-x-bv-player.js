@@ -2841,11 +2841,7 @@ export class YahooXBvPlayer extends HTMLElement {
       };
     }
 
-    // do not init once checkVisibility: false
-    if (
-      this.classList.contains('msc-any-pip-cloned') ||
-      !this.checkVisibility?.({ contentVisibilityAuto: true, opacityProperty: true, visibilityProperty: true })
-    ) {
+    if (!_wcl.checkVisibility(this)) {
       return;
     }
 
@@ -3007,8 +3003,7 @@ export class YahooXBvPlayer extends HTMLElement {
   async attributeChangedCallback(attrName, oldValue, newValue) {
     if (
       !YahooXBvPlayer.observedAttributes.includes(attrName) ||
-      this.classList.contains('msc-any-pip-cloned') ||
-      !this.checkVisibility?.({ contentVisibilityAuto: true, opacityProperty: true, visibilityProperty: true })
+      !_wcl.checkVisibility(this)
     ) {
       return;
     }
@@ -3800,6 +3795,10 @@ export class YahooXBvPlayer extends HTMLElement {
       container.replaceChildren();
     }
 
+    if (!_wcl.checkVisibility(this)) {
+      return;
+    }
+
     // playbackSession
     if (this.playerconfig?.playbackToken && !this.#data.playbackSession) {
       try {
@@ -3873,7 +3872,7 @@ export class YahooXBvPlayer extends HTMLElement {
           () => {
             video.pause();
 
-            if (this.hasAttribute('autoplay') && !this.classList.contains('msc-any-pip-cloned')) {
+            if (this.hasAttribute('autoplay')) {
               this.removeAttribute('autoplay');
               player.setVolume(0);
               player.play();

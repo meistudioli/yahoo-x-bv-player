@@ -167,6 +167,47 @@ Object.defineProperties(_wcl, {
       );
     }
   },
+  checkVisibility: {
+    configurable: true,
+    enumerable: true,
+    value: function(element) {
+      let result = true;
+
+      if (!element.checkVisibility) {
+        result = element.checkVisibility({ contentVisibilityAuto:true, opacityProperty:true, visibilityProperty:true });
+      } else if (!element.computedStyleMap) {
+        const allComputedStyles = element.computedStyleMap();
+        const { value: display } = allComputedStyles.get('display');
+        const { value: opacity } = allComputedStyles.get('opacity');
+        const { value: visibility } = allComputedStyles.get('visibility');
+        const { value: contentVisibility } = allComputedStyles.get('content-visibility');
+
+        result =
+          opacity === 0 || 
+          display === 'none' || 
+          visibility === 'hidden' || 
+          contentVisibility === 'auto'
+            ? false
+            : true;
+      } else if (window.getComputedStyle) {
+        const allComputedStyles = window.getComputedStyle(element);
+        const display = allComputedStyles.getPropertyValue('display');
+        const opacity = allComputedStyles.getPropertyValue('opacity');
+        const visibility = allComputedStyles.getPropertyValue('visibility');
+        const contentVisibility = allComputedStyles.getPropertyValue('content-visibility');
+
+        result =
+          +opacity === 0 || 
+          display === 'none' || 
+          visibility === 'hidden' || 
+          contentVisibility === 'auto'
+            ? false
+            : true;
+      }
+
+      return result;
+    }
+  },
   rgbToHex: {
     configurable: true,
     enumerable: true,
@@ -858,7 +899,7 @@ Object.defineProperties(_wcl, {
   loadImage: {
     configurable: true,
     enumerable: true,
-    value: function(url, crossOrigin = '') {
+    value: function(url, crossOrigin) {
       return new Promise(
         (resolve, reject) => {
           const img = new Image();
@@ -871,7 +912,7 @@ Object.defineProperties(_wcl, {
             reject(e);
           };
 
-          if (!!crossOrigin) {
+          if (typeof crossOrigin !== 'undefined') {
             img.crossOrigin = crossOrigin;
           }
           
