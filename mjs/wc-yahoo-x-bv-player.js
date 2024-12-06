@@ -4,7 +4,7 @@ import { colorPalette, buttons } from './fuji-css.js';
 
 import Mustache from './mustache.js';
 import 'https://unpkg.com/@blendvision/link@0.0.2';
-import 'https://unpkg.com/@blendvision/player@2.20.6';
+import 'https://unpkg.com/@blendvision/player@2.20.8';
 // import 'https://unpkg.com/@blendvision/player@2.21.0-canary.1';
 import 'https://unpkg.com/@blendvision/chatroom-javascript-sdk/index.min.js';
 
@@ -3939,14 +3939,15 @@ export class YahooXBvPlayer extends HTMLElement {
       ]
     });
 
-    const trackHandler = (player) => {
+    const trackHandler = async (player) => {
       if (window?.documentPictureInPicture?.window) {
         window?.documentPictureInPicture?.window.close();
       }
 
       this.pause();
+      player.pause();
       player.scrollIntoView({ behavior:'smooth', block:'center' });
-      player.play();
+      requestAnimationFrame(() => player.play());
     };
 
     navigator.mediaSession.setActionHandler('seekbackward', () => this._onKeydown({ key: 'j' }));
