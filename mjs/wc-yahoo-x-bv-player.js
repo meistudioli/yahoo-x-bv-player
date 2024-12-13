@@ -174,6 +174,15 @@ ${buttons}
     .main {
       --yahoo-logo-display: block;
       --preview-inset-block-start-stuff: 0px;
+
+      @container (width < 320px) {
+        .controls {
+          .button--subtitles {
+            visibility: hidden;
+            pointer-events: none;
+          }
+        }
+      }
     }
 
     .listings {
@@ -458,6 +467,30 @@ ${buttons}
 
     .reactions {
       --reaction-size: 70;
+    }
+  }
+
+  /* handle small size */
+  @container (width < 320px) {
+    .controls {
+      .button--screenshot {
+        display: none;
+      }
+    }
+  }
+
+  @container (width <= 190px) {
+    .controls .actions__part--end {
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .preview {
+      display: none;
+    }
+
+    .chatroom {
+      --chatroom-max-inline-size: calc(100% - var(--padding-inline) * 2);
     }
   }
 
@@ -3360,7 +3393,14 @@ export class YahooXBvPlayer extends HTMLElement {
   }
 
   set muted(value) {
-    this.#data.player[value ? 'mute' : 'unmute']();
+    const { player } = this.#data;
+
+    if (value) {
+      player.mute();
+    } else {
+      player.unmute();
+      player.setVolume(1);
+    }
   }
 
   get muted() {
@@ -3395,20 +3435,24 @@ export class YahooXBvPlayer extends HTMLElement {
       time.push(tmp);
       ct = ct % 60;
     } else {
-      time.push('0');
+      time.push(0);
     }
 
     //second
     if (ct) {
-      if (ct < 10) {
-        ct = '0' + ct;
-      }
       time.push(ct);
     } else {
-      time.push('00');
+      time.push(0);
     }
 
-    return time.join(':');
+    return time
+      .map(
+        (D) => {
+          D = `0${D}`; 
+          return D.substring(D.length - 2);
+        }
+      )
+      .join(':');
   }
 
   #setupSocket() {
@@ -4529,7 +4573,12 @@ export class YahooXBvPlayer extends HTMLElement {
         break;
 
       case 'mute':
-        player[player.getVolume() === 0 ? 'unmute' : 'mute']();
+        if (this.muted) {
+          player.unmute();
+          player.setVolume(1);
+        } else {
+          player.mute();
+        }
         break;
 
       case 'screenshot': {
