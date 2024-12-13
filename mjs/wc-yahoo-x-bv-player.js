@@ -2809,6 +2809,7 @@ export class YahooXBvPlayer extends HTMLElement {
       messageTemplate: this.shadowRoot.querySelector('#message-template'),
       liveActions: this.shadowRoot.querySelector('.live-controls__buttons'),
       emotions: this.shadowRoot.querySelector('.live-controls__like__emotions'),
+      preview: this.shadowRoot.querySelector('.preview'),
       previewTrigger: this.shadowRoot.querySelector('.preview__trigger'),
       previewImg: this.shadowRoot.querySelector('.preview__img'),
       previewSpan: this.shadowRoot.querySelector('.preview__span')
@@ -3092,7 +3093,7 @@ export class YahooXBvPlayer extends HTMLElement {
 
       case 'products': {
         /* mustache stuff */
-        const { listings, previewTrigger, previewImg } = this.#nodes;
+        const { listings, preview, previewTrigger, previewImg } = this.#nodes;
         const { buynow } = this.l10n;
         const products = this.products.map(
           (unit, idx) => {
@@ -3108,14 +3109,19 @@ export class YahooXBvPlayer extends HTMLElement {
         const productsString = Mustache.render(templateProducts.innerHTML, { products });
         listings.insertAdjacentHTML('beforeend', productsString);
 
-        // broadcastingId
-        let broadcastingId = products.findIndex(({ broadcasting = false }) => broadcasting);
-        if (broadcastingId === -1) {
-          broadcastingId = 0;
-        }
+        if (products.length) {
+          // broadcastingId
+          let broadcastingId = products.findIndex(({ broadcasting = false }) => broadcasting);
+          if (broadcastingId === -1) {
+            broadcastingId = 0;
+          }
 
-        previewTrigger.dataset.serialNo = broadcastingId + 1;
-        previewImg.src = products[broadcastingId].thumbnail;
+          previewTrigger.dataset.serialNo = broadcastingId + 1;
+          previewImg.src = products[broadcastingId].thumbnail;
+          preview.hidden = false;
+        } else {
+          preview.hidden = true;
+        }
         break;
       }
 
