@@ -63,6 +63,10 @@ const defaults = {
     announce: ''
   },
   messagetemplate: [],
+  luckydraw: {
+    roomId: '',
+    startTime: ''
+  },
   products: [
     /*
       {
@@ -104,12 +108,14 @@ const defaults = {
     exceededbid: 'Someone has exceeded your last bid price ${{price}}.',
     wonbid: 'won the bid as price ${{price}}.',
     cancelledplacebid: 'Owner canceled {{nickname}}\'s bid.',
-    placebid: 'has place bid as price ${{price}}.'
+    placebid: 'has place bid as price ${{price}}.',
+    luckydrawend: 'End',
+    luckydrawjoin: 'Join'
   }
 };
 
 const booleanAttrs = ['loop', 'autopilot'];
-const objectAttrs = ['playerconfig', 'chatroomconfig', 'ysocket', 'share', 'host', 'products', 'l10n', 'messagetemplate'];
+const objectAttrs = ['playerconfig', 'chatroomconfig', 'ysocket', 'share', 'host', 'products', 'l10n', 'messagetemplate', 'luckydraw'];
 const custumEvents = {
   play: 'yahoo-x-bv-player-play',
   pause: 'yahoo-x-bv-player-pause',
@@ -118,7 +124,8 @@ const custumEvents = {
   purchaseClick: 'yahoo-x-bv-player-purchase-click',
   followClick: 'yahoo-x-bv-player-follow-click',
   liveEnded: 'yahoo-x-bv-player-live-ended',
-  addProduct: 'yahoo-x-bv-player-add-product'
+  addProduct: 'yahoo-x-bv-player-add-product',
+  luckydrawClick: 'yahoo-x-bv-player-luckydraw-click'
 };
 const legalKey = [
   'k',
@@ -149,6 +156,7 @@ const pipEnabled = !!document.pictureInPictureEnabled;
 const clearDelay = 2500;
 const trophyMilestones = [50, 100, 1000];
 const maxMessageCount = 50;
+const isAttrEnhanced = CSS.supports('color', 'attr(data-color type(<color>), rgba(0 0 0))');
 
 const template = document.createElement('template');
 template.innerHTML = `
@@ -851,6 +859,113 @@ ${buttons}
           margin-inline: auto;
           font-size: 12px;
           margin-block: 2px;
+        }
+      }
+
+      .lucky-draw {
+        --progress-color: rgba(240 144 53);
+        --value: attr(data-progress-value type(<number>), 0);
+        --progress-value: calc(var(--value) * 1%);
+        --progress-opacity: 0;
+
+        --opacity-normal: 0;
+        --opacity-active: 1;
+        --opacity: var(--opacity-normal);
+        --pointer-events-normal: none;
+        --pointer-events-active: auto;
+        --pointer-events: var(--pointer-events-normal);
+
+        flex-shrink: 0;
+        font-size: 16px;
+        appearance: none;
+        box-shadow: unset;
+        border: unset;
+        background: transparent;
+        -webkit-user-select: none;
+        user-select: none;
+        pointer-events: auto;
+        margin: 0;
+        padding: 0;
+        outline: 0 none;
+
+        position: absolute;
+        inset-inline-end: var(--padding-inline);
+        inset-block-start: calc(100% + 8px);
+        inline-size: 4em;
+        opacity: var(--opacity);
+        transition: opacity .45s ease;
+        will-change: opacity;
+        pointer-events: var(--pointer-events);
+
+        &.lucky-draw--active {
+          --opacity: var(--opacity-active);
+          --pointer-events: var(--pointer-events-active);
+        }
+
+        &[data-progress-value] {
+          --progress-opacity: 1;
+        }
+
+        &:active {
+          scale: .95;
+        }
+
+        .lucky-draw__vision {
+          position: relative;
+          inline-size: 54px;
+          block-size: 48px;
+          margin: 0 auto;
+          background-color: rgba(255 255 255/.5);
+          border-radius: 4px;
+          display: block;
+          background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzUiIGhlaWdodD0iMzUiIHZpZXdCb3g9IjAgMCAzNSAzNSIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik05LjUwNDcyIDguNzcwOEw3LjU1NzcxIDYuNjM2MTVDNy4wMTQzOSA2LjA0MDQ4IDcuMDY1NDEgNS4xMjE5NyA3LjY3MTY2IDQuNTg0NjJDNy43MTYxMiA0LjU0NTIxIDcuNzYyOTYgNC41MDg1IDcuODExOTIgNC40NzQ2N0wxMi40NTkxIDEuMjY0MThDMTMuMTI2NyAwLjgwMjk2NSAxNC4wNDU2IDAuOTYxMTg5IDE0LjUxMTQgMS42MTc1OUMxNC41NDU2IDEuNjY1NzIgMTQuNTc2NyAxLjcxNTg3IDE0LjYwNDcgMS43Njc3NUwxNy41IDcuMTM2MjdMMjAuMzk1MyAxLjc2Nzc1QzIwLjQyMzMgMS43MTU4NyAyMC40NTQ0IDEuNjY1NzIgMjAuNDg4NiAxLjYxNzU5QzIwLjk1NDQgMC45NjExODkgMjEuODczMyAwLjgwMjk2NSAyMi41NDA5IDEuMjY0MThMMjcuMTg4MSA0LjQ3NDY3QzI3LjIzNyA0LjUwODUgMjcuMjgzOSA0LjU0NTIxIDI3LjMyODMgNC41ODQ2MkMyNy45MzQ2IDUuMTIxOTcgMjcuOTg1NiA2LjA0MDQ4IDI3LjQ0MjMgNi42MzYxNUwyNS40OTUzIDguNzcwOEgzMC43QzMyLjUyMjUgOC43NzA4IDM0IDEwLjIzOTkgMzQgMTIuMDUyMVYxNi40MjcxQzM0IDE3LjAzMTEgMzMuNTA3NSAxNy41MjA4IDMyLjkgMTcuNTIwOEgzMS4yNVYzMC42NDU4QzMxLjI1IDMyLjQ1OCAyOS43NzI1IDMzLjkyNzEgMjcuOTUgMzMuOTI3MUg3LjA1QzUuMjI3NDYgMzMuOTI3MSAzLjc1IDMyLjQ1OCAzLjc1IDMwLjY0NThWMTcuNTIwOEgyLjFDMS40OTI0OSAxNy41MjA4IDEgMTcuMDMxMSAxIDE2LjQyNzFWMTIuMDUyMUMxIDEwLjIzOTkgMi40Nzc0NiA4Ljc3MDggNC4zIDguNzcwOEg5LjUwNDcyWiIgZmlsbD0idXJsKCNwYWludDBfbGluZWFyXzQ1M183NTk3KSIgc3Ryb2tlPSJ3aGl0ZSIgc3Ryb2tlLXdpZHRoPSIxLjM3NSIvPgo8cGF0aCBvcGFjaXR5PSIwLjgxMDM3OSIgZmlsbC1ydWxlPSJldmVub2RkIiBjbGlwLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNS4wNjEzIDQuMTIyMDRDMTQuNTQ1MiAzLjE2MjM4IDEzLjMwOTggMi44NjQwNSAxMi40MTI3IDMuNDgyNDhMOS45Nzg5NiA1LjE2MDIxQzkuMDYzNTcgNS43OTEyNSA4LjkxODQxIDcuMDg2MzMgOS42NzEzOCA3LjkwNDM2TDEwLjY3OTkgOUwxNi4yNzg0IDlMMTcgNy43Mjc0N0wxNS4wNjEzIDQuMTIyMDRaIiBmaWxsPSJ1cmwoI3BhaW50MV9saW5lYXJfNDUzXzc1OTcpIi8+CjxwYXRoIGZpbGwtcnVsZT0iZXZlbm9kZCIgY2xpcC1ydWxlPSJldmVub2RkIiBkPSJNNS4xOTcwMiAxNy43MzMzSDMwLjU4ODdMMTUuNjk2NCAzMC40MDUxQzEzLjg2MzggMzEuOTY0NCAxMS41MzExIDMyLjgyMTQgOS4xMTkwNCAzMi44MjE0SDguMjMxODhDNi41NTU3NyAzMi44MjE0IDUuMTk3MDIgMzEuNDcwNCA1LjE5NzAyIDI5LjgwMzhMNS4xOTcwMiAxNy43MzMzWiIgZmlsbD0idXJsKCNwYWludDJfbGluZWFyXzQ1M183NTk3KSIvPgo8cGF0aCBkPSJNMTcuMzcgMjIuMTVWMjguODczSDE2LjUzM1YyOC40NzdIMTMuNDQ2VjI4Ljg4MkgxMi42MDlWMjIuMTVIMTQuNTQ0VjIwLjYzOEgxNS40MDhWMjIuMTVIMTcuMzdaTTEzLjQ0NiAyNy42NThIMTQuNTQ0VjI1LjY0MkgxMy40NDZWMjcuNjU4Wk0xNS40MDggMjUuNjQyVjI3LjY1OEgxNi41MzNWMjUuNjQySDE1LjQwOFpNMTMuNDQ2IDI0Ljg1OUgxNC41NDRWMjIuOTc4SDEzLjQ0NlYyNC44NTlaTTE1LjQwOCAyMi45NzhWMjQuODU5SDE2LjUzM1YyMi45NzhIMTUuNDA4Wk0xMi4yNCAyNC4xMDNWMjQuOTc2QzExLjk1MiAyNS4xMjkgMTEuNjczIDI1LjI3MyAxMS4zOTQgMjUuNDA4VjI3Ljk4MkMxMS4zOTQgMjguNTU4IDExLjA5NyAyOC44NTUgMTAuNTEyIDI4Ljg1NUg5Ljc0N0w5LjU1OCAyOC4wMjdDOS43ODMgMjguMDU0IDkuOTk5IDI4LjA3MiAxMC4yMTUgMjguMDcyQzEwLjQzMSAyOC4wNzIgMTAuNTM5IDI3Ljk2NCAxMC41MzkgMjcuNzY2VjI1Ljc4NkMxMC4yMDYgMjUuOTEyIDkuODczIDI2LjAzOCA5LjU0IDI2LjE1NUw5LjMyNCAyNS4yOTFDOS43MzggMjUuMTkyIDEwLjE0MyAyNS4wNjYgMTAuNTM5IDI0LjkyMlYyMy4wMjNIOS40NTlWMjIuMjA0SDEwLjUzOVYyMC42NDdIMTEuMzk0VjIyLjIwNEgxMi4yMDRWMjMuMDIzSDExLjM5NFYyNC41NTNDMTEuNjgyIDI0LjQwOSAxMS45NyAyNC4yNjUgMTIuMjQgMjQuMTAzWk0yMi4yMTIgMjUuNDk4TDIzLjA0IDI1LjU4OEMyMy4wMTMgMjUuNzY4IDIyLjk3NyAyNS45MyAyMi45MzIgMjYuMDkySDI0LjE3NEMyNC4wNTcgMjUuOTEyIDIzLjk0IDI1Ljc0MSAyMy44MTQgMjUuNTk3TDI0LjMgMjUuNDM1TDI0LjE4MyAyNC44NTlDMjQuMzgxIDI0Ljg4NiAyNC41NyAyNC45MDQgMjQuNzUgMjQuOTA0QzI0Ljg5NCAyNC45MDQgMjQuOTY2IDI0LjgyMyAyNC45NjYgMjQuNjc5VjI0LjE2NkgyMy4wNThDMjMuNCAyNC40NzIgMjMuNjYxIDI0Ljc0MiAyMy44NTkgMjQuOTc2TDIzLjMwMSAyNS4zNzJDMjMuMDg1IDI1LjA4NCAyMi43ODggMjQuNzc4IDIyLjQyOCAyNC40NTRMMjIuODg3IDI0LjE2NkgyMS43MDhWMjMuNUgyMi4xMTNMMjEuODI1IDIyLjk5NkMyMy42MzQgMjIuNzI2IDI0Ljg0OSAyMi4yNDkgMjUuNDYxIDIxLjU4M0gyMy44MTRDMjQuMDc1IDIxLjczNiAyNC4yOTEgMjEuODggMjQuNDUzIDIyLjAwNkwyMy45NzYgMjIuMzM5QzIzLjcyNCAyMi4xMjMgMjMuNDA5IDIxLjg5OCAyMy4wMjIgMjEuNjY0QzIyLjc1MiAyMS43OSAyMi40NDYgMjEuOTE2IDIyLjExMyAyMi4wMzNMMjEuNjk5IDIxLjQ5M0MyMi41OTkgMjEuMjQxIDIzLjIwMiAyMC45MzUgMjMuNTE3IDIwLjU3NUwyNC4yNzMgMjAuNjY1QzI0LjE4MyAyMC43ODIgMjQuMDkzIDIwLjg5IDIzLjk5NCAyMC45ODlIMjYuMzE2VjIxLjU0N0MyNS43NzYgMjIuNDU2IDI0LjQ0NCAyMy4xMDQgMjIuMzIgMjMuNUgyNC45NjZWMjIuNzg5SDI1Ljc2N1YyMy41SDI2LjU4NlYyNC4xNjZIMjUuNzY3VjI0Ljg1OUMyNS43NjcgMjUuMzA5IDI1LjUwNiAyNS41NDMgMjQuOTkzIDI1LjU0M0gyNC42NTFDMjQuNzk1IDI1LjcyMyAyNC45MTIgMjUuOTEyIDI1LjAyIDI2LjA5MkgyNi4zNzlWMjYuODc1SDIyLjYyNkMyMi40MzcgMjcuMjE3IDIyLjE5NCAyNy41MTQgMjEuODk3IDI3Ljc2NkMyMS4zMjEgMjguMjYxIDIwLjMyMiAyOC42NDggMTguODgyIDI4LjkzNkwxOC41NTggMjguMTYyQzE5Ljc4MiAyNy45NDYgMjAuNjczIDI3LjY0IDIxLjIxMyAyNy4yNDRDMjEuMzU3IDI3LjEyNyAyMS40ODMgMjcuMDAxIDIxLjYgMjYuODc1SDE4LjYzVjI2LjA5MkgyMi4wNTlDMjIuMTIyIDI1Ljg5NCAyMi4xNzYgMjUuNjk2IDIyLjIxMiAyNS40OThaTTE4LjYzOSAyMy4zMkgyMC41NTZWMjIuNjlIMTguOTQ1VjIwLjg2M0gxOS43MTlWMjIuMDQySDIwLjU1NlYyMC42MzhIMjEuMzY2VjI1LjU5N0gyMC41NTZWMjMuOTg2SDE5Ljk4QzE5LjkwOCAyNC44MTQgMTkuNjY1IDI1LjM5OSAxOS4yMzMgMjUuNzQxTDE4LjYyMSAyNS4yNzNDMTguOTkgMjUuMDMgMTkuMjA2IDI0LjU5OCAxOS4yNiAyMy45ODZIMTguNjM5VjIzLjMyWk0yMi4wMzIgMjIuNzYyTDIxLjg3IDIyLjI4NUMyMi4zMjkgMjIuMTk1IDIyLjc3IDIyLjA5NiAyMy4xOTMgMjEuOTdMMjMuMzM3IDIyLjQwMkMyMi45MzIgMjIuNTQ2IDIyLjUgMjIuNjYzIDIyLjAzMiAyMi43NjJaTTIyLjc5NyAyNy4xNzJDMjQuMDc1IDI3LjQwNiAyNS4yOSAyNy43MyAyNi40NiAyOC4xNTNMMjYuMTYzIDI4Ljg5MUMyNC45ODQgMjguNDMyIDIzLjc1MSAyOC4wNzIgMjIuNDczIDI3LjgxMUwyMi43OTcgMjcuMTcyWiIgZmlsbD0id2hpdGUiLz4KPGRlZnM+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQwX2xpbmVhcl80NTNfNzU5NyIgeDE9IjIwLjk1MTQiIHkxPSItMzAuODg3MSIgeDI9Ii0zMS4xODE2IiB5Mj0iMTQuNzQ1NSIgZ3JhZGllbnRVbml0cz0idXNlclNwYWNlT25Vc2UiPgo8c3RvcCBzdG9wLWNvbG9yPSIjRkFEQzAwIi8+CjxzdG9wIG9mZnNldD0iMSIgc3RvcC1jb2xvcj0iI0ZBMTIyOSIvPgo8L2xpbmVhckdyYWRpZW50Pgo8bGluZWFyR3JhZGllbnQgaWQ9InBhaW50MV9saW5lYXJfNDUzXzc1OTciIHgxPSIxNy42NzI5IiB5MT0iNC44NzcxMSIgeDI9IjE2LjEzMjEiIHkyPSIxMC4yMzgzIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIHN0b3AtY29sb3I9IiNGRjAwMDAiLz4KPHN0b3Agb2Zmc2V0PSIxIiBzdG9wLWNvbG9yPSIjRkY3MjFDIi8+CjwvbGluZWFyR3JhZGllbnQ+CjxsaW5lYXJHcmFkaWVudCBpZD0icGFpbnQyX2xpbmVhcl80NTNfNzU5NyIgeDE9IjIwLjgwMjMiIHkxPSIzOC40MDE4IiB4Mj0iMjkuNDgyMyIgeTI9IjE5LjEyNDEiIGdyYWRpZW50VW5pdHM9InVzZXJTcGFjZU9uVXNlIj4KPHN0b3Agc3RvcC1jb2xvcj0iI0ZBNEUxRCIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiNGNTI5MDAiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K) rgba(255 255 255/.5) no-repeat 50% 4px;
+        }
+
+        .lucky-draw__info {
+          --block-size: 24px;
+          --border-size: 2px;
+          --em-block-size: calc(var(--block-size) - var(--border-size) * 2);
+
+          --info-text: attr(data-text);
+
+          position: relative;
+          inline-size: 100%;
+          block-size: var(--block-size);
+          box-sizing: border-box;
+          padding: var(--border-size);
+          border-radius: var(--block-size);
+          display: block;
+          overflow: hidden;
+          margin-block-start: -7px;
+
+          &::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            margin: auto;
+            pointer-events: none;
+            opacity: var(--progress-opacity);
+            
+            background: conic-gradient(var(--progress-color) var(--progress-value), 0, transparent calc(100% - var(--progress-value)));
+            background-color: rgba(255 255 255);
+            transition: background .5s ease;
+            will-change: background;
+          }
+
+          &::after {
+            content: var(--info-text);
+            position: relative;
+            font-size: .75em;
+            inline-size: 100%;
+            block-size: var(--em-block-size);
+            color: rgba(255 255 255);
+            line-height: var(--em-block-size);
+            text-align: center;
+            background-color: rgba(0 0 0);
+            border-radius: var(--block-size);
+            display: block;
+            z-index: 1;
+          }
         }
       }
     }
@@ -2118,6 +2233,8 @@ ${buttons}
     opacity: 0;
   }
 }
+
+#lucky-draw.maneuver{}
 </style>
 
 <div class="main" ontouchstart="" tabindex="0" data-type="live">
@@ -2153,6 +2270,16 @@ ${buttons}
       <button type="button" class="preview__trigger" data-serial-no="1" data-action="open">
         <img class="preview__img" />
         <span class="preview__span">View</span>
+      </button>
+
+      <button
+        type="button"
+        id="lucky-draw"
+        class="lucky-draw maneuver"
+        data-progress-value="0"
+      >
+        <span class="lucky-draw__vision"></span>
+        <span class="lucky-draw__info" data-text="--:--"></span>
       </button>
     </div>
 
@@ -2771,7 +2898,9 @@ export class YahooXBvPlayer extends HTMLElement {
       reserveLikeCount: 0,
       viewCount: 0,
       recallKey: '',
-      socket: ''
+      socket: '',
+      iidForCountdown: '',
+      luckydrawTotalDuration: 0
     };
 
     // nodes
@@ -2787,6 +2916,8 @@ export class YahooXBvPlayer extends HTMLElement {
       btnPips: Array.from(this.shadowRoot.querySelectorAll('.button--pip')),
       btnCancelRefreshing: this.shadowRoot.querySelector('.button--cancel-refreshing'),
       btnPreview: this.shadowRoot.querySelector('.preview__trigger'),
+      btnLuckydraw: this.shadowRoot.querySelector('.lucky-draw'),
+      btnLuckydrawText: this.shadowRoot.querySelector('.lucky-draw__info'),
       btnLike: this.shadowRoot.querySelector('.button--like'),
       btnDialogClose: this.shadowRoot.querySelector('.fuji-alerts__close'),
       btnFollow: this.shadowRoot.querySelector('.button--follow'),
@@ -2842,6 +2973,7 @@ export class YahooXBvPlayer extends HTMLElement {
     this._onEmotionAnimationend = this._onEmotionAnimationend.bind(this);
     this._onButtonFollowClick = this._onButtonFollowClick.bind(this);
     this._socketEventsHandler = this._socketEventsHandler.bind(this);
+    this._onLuckydrawClick = this._onLuckydrawClick.bind(this);
   }
 
   async connectedCallback() {
@@ -2854,6 +2986,7 @@ export class YahooXBvPlayer extends HTMLElement {
       btnPreview,
       btnDialogClose,
       btnFollow,
+      btnLuckydraw,
       progress,
       reactions,
       dialog,
@@ -2924,6 +3057,7 @@ export class YahooXBvPlayer extends HTMLElement {
     messageForm.addEventListener('submit', this._onMessageSubmit, { signal });
     emotions.addEventListener('animationend', this._onEmotionAnimationend, { signal });
     btnLike.addEventListener('click', this._onControlsButtonClick, { signal });
+    btnLuckydraw.addEventListener('click', this._onLuckydrawClick, { signal });
 
     // fullscreen
     if (fullscreenEnabled) {
@@ -2994,6 +3128,7 @@ export class YahooXBvPlayer extends HTMLElement {
         case 'messagetemplate':
         case 'chatroomconfig':
         case 'ysocket':
+        case 'luckydraw':
         case 'playerconfig': {
           let values;
           try {
@@ -3062,8 +3197,8 @@ export class YahooXBvPlayer extends HTMLElement {
       }
 
       case 'l10n': {
-        const { buynow, previewtrigger, listingshead } = this.l10n;
-        const { listings, previewSpan, listingsHead } = this.#nodes;
+        const { buynow, previewtrigger, listingshead, luckydrawjoin } = this.l10n;
+        const { listings, previewSpan, listingsHead, btnLuckydraw, btnLuckydrawText } = this.#nodes;
         const buttons = Array.from(listings.querySelectorAll('.listings__unit__actions__buttons .buttons'));
 
         // preview listing view
@@ -3074,6 +3209,15 @@ export class YahooXBvPlayer extends HTMLElement {
 
         // listing button
         buttons.forEach((button) => button.textContent = buynow);
+
+        // luckydraw
+        const countdown = !!btnLuckydraw.dataset.progressValue;
+        if (
+          btnLuckydraw.classList.contains('lucky-draw--active') && 
+          !countdown
+        ) {
+          btnLuckydrawText.dataset.text = luckydrawjoin;
+        }
         break;
       }
 
@@ -3135,6 +3279,39 @@ export class YahooXBvPlayer extends HTMLElement {
         host.querySelector('.host__ens__info__name').textContent = name;
         host.querySelector('.button--follow').toggleAttribute('data-reverse', follow);
         viewCount.textContent = count;
+        break;
+      }
+
+      case 'luckydraw': {
+        const { roomId = '', startTime = '' } = this.luckydraw;
+        const { btnLuckydraw, btnLuckydrawText } = this.#nodes;
+
+        let show = false;
+        let needCountdown = false;
+        let duration = 0;
+
+        clearInterval(this.#data.iidForCountdown);
+
+        if (roomId && startTime) {
+          show = true;
+          needCountdown = true;
+          duration = +new Date() - +new Date(startTime);
+        }
+
+        btnLuckydraw.disabled = false;
+        btnLuckydraw.classList.toggle('lucky-draw--active', show);
+        btnLuckydraw.dataset.progressValue = 0;
+        btnLuckydrawText.dataset.text = '--:--';
+
+        this.#data.luckydrawTotalDuration = duration;
+
+        if (needCountdown) {
+          this.#data.iidForCountdown = setInterval(
+            () => {
+              this.#updateLuckydrawProgress();
+            }
+          , 16.67);
+        }
         break;
       }
 
@@ -3320,6 +3497,23 @@ export class YahooXBvPlayer extends HTMLElement {
     return this.#config.host;
   }
 
+  set luckydraw(value) {
+    if (value) {
+      const newValue = {
+        ...defaults.luckydraw,
+        ...this.luckydraw,
+        ...(typeof value === 'string' ? JSON.parse(value) : value)
+      };
+      this.setAttribute('luckydraw', JSON.stringify(newValue));
+    } else {
+      this.removeAttribute('luckydraw');
+    }
+  }
+
+  get luckydraw() {
+    return this.#config.luckydraw;
+  }
+  
   set share(value) {
     if (value) {
       const newValue = {
@@ -3422,6 +3616,36 @@ export class YahooXBvPlayer extends HTMLElement {
         ...(detail && { detail })
       }
     ));
+  }
+
+  #updateLuckydrawProgress() {
+    const { startTime = '' } = this.luckydraw;
+    const { btnLuckydraw, btnLuckydrawText } = this.#nodes;
+    const duration = Math.abs(this.#data.luckydrawTotalDuration);
+    const distance = +new Date(startTime) - +new Date();
+
+    if (distance <= 0) {
+      clearInterval(this.#data.iidForCountdown);
+      btnLuckydrawText.dataset.text = this.l10n.luckydrawjoin;
+      btnLuckydraw.toggleAttribute('data-progress-value', false);
+    } else {
+      const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+      const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+      const progress = ((duration - distance) / duration) * 100;
+
+      btnLuckydraw.dataset.progressValue = progress;
+      btnLuckydrawText.dataset.text = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+
+      if (!isAttrEnhanced) {
+        _wcl.addStylesheetRules(
+          '#lucky-draw.maneuver',
+          {
+            '--value': progress
+          },
+          this.#nodes.styleSheet
+        );
+      }
+    }
   }
 
   #timeFormat(seconds) {
@@ -4461,6 +4685,22 @@ export class YahooXBvPlayer extends HTMLElement {
     unit.remove();
   }
 
+  _onLuckydrawClick() {
+    const { btnLuckydraw } = this.#nodes;
+    const { roomId = '' } = this.luckydraw;
+
+    if (!btnLuckydraw.classList.contains('lucky-draw--active')) {
+      return;
+    }
+
+    const countdown = !!btnLuckydraw.dataset.progressValue;
+
+    this.#fireEvent(custumEvents.luckydrawClick, {
+      roomId,
+      active: !countdown
+    });
+  }
+
   _onButtonFollowClick(evt) {
     const { btnFollow } = this.#nodes;
     
@@ -4482,7 +4722,9 @@ export class YahooXBvPlayer extends HTMLElement {
       attribute: {
         nickname = '',
         price = '',
-        listingId = ''
+        listingId = '',
+        luckyDrawStartTs = '',
+        roomId = ''
       } = {}
     } = message;
 
@@ -4514,6 +4756,23 @@ export class YahooXBvPlayer extends HTMLElement {
 
       case 'addListing': {
         this.#fireEvent(custumEvents.addProduct, { id: listingId });
+        break;
+      }
+
+      case 'startLuckyDraw': {
+        this.luckydraw = {
+          roomId,
+          startTime: luckyDrawStartTs
+        };
+        break;
+      }
+
+      case 'endLuckyDraw': {
+        const { btnLuckydraw, btnLuckydrawText } = this.#nodes;
+
+        btnLuckydraw.disabled = true;
+        btnLuckydraw.classList.toggle('lucky-draw--active', false);
+        btnLuckydrawText.dataset.text = this.l10n.luckydrawend;
         break;
       }
     }

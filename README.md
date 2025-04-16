@@ -77,7 +77,14 @@ Put &lt;yahoo-x-bv-player /> into HTML document. It will have different function
         "addfavorite": "added host as favorite.",
         "sharelive": "shared this LIVE.",
         "takesnapshot": "took snapshot.",
-        "achievetrophy": "achieved {{hits}} likes."
+        "achievetrophy": "achieved {{hits}} likes.",
+        "highestbid": "bid ${{price}} and become the highest bidder.",
+        "exceededbid": "Someone has exceeded your last bid price ${{price}}.",
+        "wonbid": "won the bid as price ${{price}}.",
+        "cancelledplacebid": "Owner canceled {{nickname}}\'s bid.",
+        "placebid": "has place bid as price ${{price}}.",
+        "luckydrawend": "End",
+        "luckydrawjoin": "Join"
       },
       "messagetemplate": [
         "👍",
@@ -87,6 +94,10 @@ Put &lt;yahoo-x-bv-player /> into HTML document. It will have different function
         "材質？",
         "多少錢？"
       ],
+      "luckydraw": {
+        "roomId": "1234567890",
+        "startTime": "2025-04-16T12:00:00.000Z"
+      },
       "products": [
         {
           "id": "A1234567890",
@@ -423,6 +434,18 @@ Set host information.
   ...
 </yahoo-x-bv-player>
 ```
+- **luckydraw**
+
+Set luckydraw information.
+
+`roomId`：Set roomId information.\
+`startTime`：Set luckydraw event start time. (ISO 8601).
+
+```html
+<yahoo-x-bv-player luckydraw='{"roomId":"1234567890","startTime":"2025-04-16T12:00:00.000Z"}'>
+  ...
+</yahoo-x-bv-player>
+```
 
 - **l10n**
 
@@ -441,10 +464,12 @@ Set localization for title or action buttons.
 `exceededbid`：Set message when bid price has been exceeded.\
 `wonbid`：Set message when won bid.\
 `cancelledplacebid`：Set message when owner canceled someone's bid.\
-`placebid`：Set message when someone place bid.
+`placebid`：Set message when someone place bid.\
+`luckydrawend`：Set text content for luckydraw event end.\
+`luckydrawjoin`：Set text content for luckydraw event start.
 
 ```html
-<yahoo-x-bv-player l10n='{"previewtrigger":"View","listingshead":"Products","buynow":"BUY NOW","jointhecrowd":"joined the crowd.","rushbuying":"is rush buying.","addfavorite":"added host as favorite.","sharelive":"shared this LIVE.","takesnapshot":"took snapshot.","achievetrophy":"achieved {{hits}} likes."}'>
+<yahoo-x-bv-player l10n='{"previewtrigger":"View","listingshead":"Products","buynow":"BUY NOW","jointhecrowd":"joined the crowd.","rushbuying":"is rush buying.","addfavorite":"added host as favorite.","sharelive":"shared this LIVE.","takesnapshot":"took snapshot.","achievetrophy":"achieved {{hits}} likes.","luckydrawend":"End","luckydrawjoin":"Join"}'>
   ...
 </yahoo-x-bv-player>
 ```
@@ -498,6 +523,7 @@ Set products' information.
 | muted | Boolean | Getter / Setter video is muted. |
 | paused | Boolean | Getter video paused status. |
 | host | Object | Getter / Setter host information. Developers could set `avatar`、`name`、`link`、`count`、`announce` and `follow` here. |
+| luckydraw | Object | Getter / Setter luckydraw information. Developers could set `roomId` and `startTime` here. |
 | l10n | Object | Getter / Setter localization for title or action buttons. Developers could set `previewtrigger`、`listingshead`、`buynow`、`jointhecrowd`、`rushbuying`、`addfavorite`、`sharelive`、`takesnapshot` and `achievetrophy` here. |
 | messagetemplate | Array | Getter / Setter message template information. Default is `[]`. |
 | products | Array | Getter / Setter products' information. Developers could set `id`、`uuid`、`title`、`link`、`thumbnail`、`price`、`marketPrice`、`priceRange`、`bestDiscount`、`marks`、`buyCount` and `broadcasting` here. |
@@ -519,6 +545,7 @@ Set products' information.
 | yahoo-x-bv-player-follow-click | Fired when host's follow button clicked. Developers could gather follow information through event.detail. |
 | yahoo-x-bv-player-live-ended | Fired when LIVE ended. Developers could gather count、createdAt and likeCount information through event.detail. |
 | yahoo-x-bv-player-add-product | Fired when user add product. Developers could gather id information through event.detail. |
+| yahoo-x-bv-player-luckydraw-click | Fired when user click luckydraw. Developers could gather luckydraw information through event.detail. |
 
 ## Reference
 - [BlendVision Web SDK](https://www.blendvision.com/zh-tw)
