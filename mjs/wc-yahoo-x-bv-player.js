@@ -65,7 +65,9 @@ const defaults = {
   messagetemplate: [],
   luckydraw: {
     roomId: '',
-    startTime: ''
+    startTime: '',
+    drawn: false,
+    terminated: false
   },
   products: [
     /*
@@ -110,7 +112,9 @@ const defaults = {
     cancelledplacebid: 'Owner canceled {{nickname}}\'s bid.',
     placebid: 'has place bid as price ${{price}}.',
     luckydrawend: 'End',
-    luckydrawjoin: 'Join'
+    luckydrawjoin: 'Join',
+    luckydrawterminate: 'End',
+    luckydrawdrawn: 'Drawn'
   }
 };
 
@@ -3197,7 +3201,7 @@ export class YahooXBvPlayer extends HTMLElement {
       }
 
       case 'l10n': {
-        const { buynow, previewtrigger, listingshead, luckydrawjoin } = this.l10n;
+        const { buynow, previewtrigger, listingshead, luckydrawterminate, luckydrawdrawn, luckydrawjoin } = this.l10n;
         const { listings, previewSpan, listingsHead, btnLuckydraw, btnLuckydrawText } = this.#nodes;
         const buttons = Array.from(listings.querySelectorAll('.listings__unit__actions__buttons .buttons'));
 
@@ -3212,11 +3216,14 @@ export class YahooXBvPlayer extends HTMLElement {
 
         // luckydraw
         const countdown = !!btnLuckydraw.dataset.progressValue;
+        const { drawn, terminated } = this.luckydraw;
         if (
           btnLuckydraw.classList.contains('lucky-draw--active') && 
           !countdown
         ) {
-          btnLuckydrawText.dataset.text = luckydrawjoin;
+          btnLuckydrawText.dataset.text = terminated
+            ? luckydrawterminate
+            : drawn ? luckydrawdrawn : luckydrawjoin;
         }
         break;
       }
@@ -3300,9 +3307,10 @@ export class YahooXBvPlayer extends HTMLElement {
 
         btnLuckydraw.disabled = false;
         btnLuckydraw.classList.toggle('lucky-draw--active', show);
-        btnLuckydraw.dataset.progressValue = 0;
-        btnLuckydrawText.dataset.text = '--:--';
-
+        if (duration < 0) {
+          btnLuckydraw.dataset.progressValue = 0;
+          btnLuckydrawText.dataset.text = '--:--';
+        }
         this.#data.luckydrawTotalDuration = duration;
 
         if (needCountdown) {
@@ -3619,14 +3627,16 @@ export class YahooXBvPlayer extends HTMLElement {
   }
 
   #updateLuckydrawProgress() {
-    const { startTime = '' } = this.luckydraw;
+    const { startTime = '', terminated = false, drawn = false } = this.luckydraw;
     const { btnLuckydraw, btnLuckydrawText } = this.#nodes;
     const duration = Math.abs(this.#data.luckydrawTotalDuration);
     const distance = +new Date(startTime) - +new Date();
 
-    if (distance <= 0) {
+    if (terminated || distance <= 0) {
       clearInterval(this.#data.iidForCountdown);
-      btnLuckydrawText.dataset.text = this.l10n.luckydrawjoin;
+      btnLuckydrawText.dataset.text = terminated
+        ? this.l10n.luckydrawterminate
+        : drawn ? this.l10n.luckydrawdrawn : this.l10n.luckydrawjoin;
       btnLuckydraw.toggleAttribute('data-progress-value', false);
     } else {
       const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
@@ -3634,7 +3644,7 @@ export class YahooXBvPlayer extends HTMLElement {
       const progress = ((duration - distance) / duration) * 100;
 
       btnLuckydraw.dataset.progressValue = progress;
-      btnLuckydrawText.dataset.text = `${minutes < 10 ? '0' : ''}${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+      btnLuckydrawText.dataset.text = `${`0${minutes}`.substr(-2)}:${`0${seconds}`.substr(-2)}`;
 
       if (!isAttrEnhanced) {
         _wcl.addStylesheetRules(
@@ -3679,8 +3689,7 @@ export class YahooXBvPlayer extends HTMLElement {
     return time
       .map(
         (D) => {
-          D = `0${D}`; 
-          return D.substring(D.length - 2);
+          return `0${D}`.substr(-2);
         }
       )
       .join(':');
@@ -4687,18 +4696,24 @@ export class YahooXBvPlayer extends HTMLElement {
 
   _onLuckydrawClick() {
     const { btnLuckydraw } = this.#nodes;
-    const { roomId = '' } = this.luckydraw;
+    const { terminated } = this.luckydraw;
+    const countdown = !!btnLuckydraw.dataset.progressValue;
 
     if (!btnLuckydraw.classList.contains('lucky-draw--active')) {
       return;
     }
 
-    const countdown = !!btnLuckydraw.dataset.progressValue;
-
     this.#fireEvent(custumEvents.luckydrawClick, {
-      roomId,
+      ...this.luckydraw,
       active: !countdown
     });
+
+    // update luckydraw
+    if (!countdown && !terminated) {
+      this.luckydraw = {
+        drawn: true
+      };
+    }
   }
 
   _onButtonFollowClick(evt) {
@@ -4768,11 +4783,9 @@ export class YahooXBvPlayer extends HTMLElement {
       }
 
       case 'endLuckyDraw': {
-        const { btnLuckydraw, btnLuckydrawText } = this.#nodes;
-
-        btnLuckydraw.disabled = true;
-        btnLuckydraw.classList.toggle('lucky-draw--active', false);
-        btnLuckydrawText.dataset.text = this.l10n.luckydrawend;
+        this.luckydraw = {
+          terminated: true
+        };
         break;
       }
     }

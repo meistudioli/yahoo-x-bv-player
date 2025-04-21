@@ -84,7 +84,9 @@ Put &lt;yahoo-x-bv-player /> into HTML document. It will have different function
         "cancelledplacebid": "Owner canceled {{nickname}}\'s bid.",
         "placebid": "has place bid as price ${{price}}.",
         "luckydrawend": "End",
-        "luckydrawjoin": "Join"
+        "luckydrawjoin": "Join",
+        "luckydrawterminate": "End",
+        "luckydrawdrawn": "Drawn"
       },
       "messagetemplate": [
         "👍",
@@ -96,7 +98,9 @@ Put &lt;yahoo-x-bv-player /> into HTML document. It will have different function
       ],
       "luckydraw": {
         "roomId": "1234567890",
-        "startTime": "2025-04-16T12:00:00.000Z"
+        "startTime": "2025-04-16T12:00:00.000Z",
+        "drawn": false,
+        "terminated": false
       },
       "products": [
         {
@@ -439,10 +443,12 @@ Set host information.
 Set luckydraw information.
 
 `roomId`：Set roomId information.\
-`startTime`：Set luckydraw event start time. (ISO 8601).
+`startTime`：Set luckydraw event start time. (ISO 8601).\
+`drawn`：Set luckydraw event drawn or not. (Boolean).\
+`terminated`：Set luckydraw event terminate or not. (Boolean).
 
 ```html
-<yahoo-x-bv-player luckydraw='{"roomId":"1234567890","startTime":"2025-04-16T12:00:00.000Z"}'>
+<yahoo-x-bv-player luckydraw='{"roomId":"1234567890","startTime":"2025-04-16T12:00:00.000Z","drawn":false,"terminated":false}'>
   ...
 </yahoo-x-bv-player>
 ```
@@ -466,10 +472,12 @@ Set localization for title or action buttons.
 `cancelledplacebid`：Set message when owner canceled someone's bid.\
 `placebid`：Set message when someone place bid.\
 `luckydrawend`：Set text content for luckydraw event end.\
-`luckydrawjoin`：Set text content for luckydraw event start.
+`luckydrawjoin`：Set text content for luckydraw event start.\
+`luckydrawterminate`：Set text content for luckydraw event terminate.\
+`luckydrawdrawn`：Set text content for luckydraw event drawn.
 
 ```html
-<yahoo-x-bv-player l10n='{"previewtrigger":"View","listingshead":"Products","buynow":"BUY NOW","jointhecrowd":"joined the crowd.","rushbuying":"is rush buying.","addfavorite":"added host as favorite.","sharelive":"shared this LIVE.","takesnapshot":"took snapshot.","achievetrophy":"achieved {{hits}} likes.","luckydrawend":"End","luckydrawjoin":"Join"}'>
+<yahoo-x-bv-player l10n='{"previewtrigger":"View","listingshead":"Products","buynow":"BUY NOW","jointhecrowd":"joined the crowd.","rushbuying":"is rush buying.","addfavorite":"added host as favorite.","sharelive":"shared this LIVE.","takesnapshot":"took snapshot.","achievetrophy":"achieved {{hits}} likes.","luckydrawend":"End","luckydrawjoin":"Join","luckydrawterminate":"End","luckydrawdrawn":"Drawn"}'>
   ...
 </yahoo-x-bv-player>
 ```
@@ -523,8 +531,8 @@ Set products' information.
 | muted | Boolean | Getter / Setter video is muted. |
 | paused | Boolean | Getter video paused status. |
 | host | Object | Getter / Setter host information. Developers could set `avatar`、`name`、`link`、`count`、`announce` and `follow` here. |
-| luckydraw | Object | Getter / Setter luckydraw information. Developers could set `roomId` and `startTime` here. |
-| l10n | Object | Getter / Setter localization for title or action buttons. Developers could set `previewtrigger`、`listingshead`、`buynow`、`jointhecrowd`、`rushbuying`、`addfavorite`、`sharelive`、`takesnapshot` and `achievetrophy` here. |
+| luckydraw | Object | Getter / Setter luckydraw information. Developers could set `roomId`、`startTime`、`drawn`、and `terminated` here. |
+| l10n | Object | Getter / Setter localization for title or action buttons. Developers could set `previewtrigger`、`listingshead`、`buynow`、`jointhecrowd`、`rushbuying`、`addfavorite`、`sharelive`、`takesnapshot`、`achievetrophy`、`highestbid`、`exceededbid`、`wonbid`、`cancelledplacebid`、`placebid`、`luckydrawend`、`luckydrawjoin`、`luckydrawterminate` and `luckydrawdrawn` here. |
 | messagetemplate | Array | Getter / Setter message template information. Default is `[]`. |
 | products | Array | Getter / Setter products' information. Developers could set `id`、`uuid`、`title`、`link`、`thumbnail`、`price`、`marketPrice`、`priceRange`、`bestDiscount`、`marks`、`buyCount` and `broadcasting` here. |
 
