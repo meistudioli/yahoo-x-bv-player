@@ -3,10 +3,8 @@ import { _wccss } from './common-css.js';
 import { colorPalette, buttons } from './fuji-css.js';
 
 import Mustache from './mustache.js';
-// import 'https://unpkg.com/@blendvision/link@0.0.2';
 import 'https://unpkg.com/@blendvision/link@0.0.2/umd/index.js';
-import 'https://unpkg.com/@blendvision/player@2.20.8';
-// import 'https://unpkg.com/@blendvision/player@2.21.0-canary.1';
+import 'https://unpkg.com/@blendvision/player@2.24.2';
 import 'https://unpkg.com/@blendvision/chatroom-javascript-sdk/index.min.js';
 
 /*
